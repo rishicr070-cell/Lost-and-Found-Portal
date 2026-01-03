@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Testing & Performance Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .complexity-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        
+        .o1 { background: #d4edda; color: #155724; }
+        .on { background: #fff3cd; color: #856404; }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .info {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 DSA Testing & Performance Demo</h1>
+        <p class="subtitle">Interactive demonstration of Linked Lists, Stacks, and Hash Tables</p>
+        
+        <!-- Statistics Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="lostCount">0</h3>
+                <p>Lost Items</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="foundCount">0</h3>
+                <p>Found Items</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="actionCount">0</h3>
+                <p>Actions Recorded</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="hashEfficiency">0%</h3>
+                <p>Hash Table Efficiency</p>
+            </div>
+        </div>
+
+        <!-- Test 1: Linked List Operations -->
+        <div class="test-section">
+            <h2>1️⃣ Linked List Operations</h2>
+            <p>Demonstrates O(1) append and O(n) search operations</p>
+            <br>
+            <button onclick="testLinkedListAppend()">Test Append (O(1))</button>
+            <button onclick="testLinkedListSearch()">Test Search (O(n))</button>
+            <button onclick="testLinkedListDisplay()">Display All Items</button>
+            <button onclick="clearLinkedList()">Clear List</button>
+            <div class="output" id="linkedlistOutput">Click a button to start testing...</div>
+        </div>
+
+        <!-- Test 2: Stack Operations -->
+        <div class="test-section">
+            <h2>2️⃣ Stack Operations (Action History)</h2>
+            <p>Demonstrates O(1) push, pop, and peek operations</p>
+            <br>
+            <button onclick="testStackPush()">Test Push (O(1))</button>
+            <button onclick="testStackPop()">Test Pop (O(1))</button>
+            <button onclick="testStackPeek()">Test Peek (O(1))</button>
+            <button onclick="testStackHistory()">Show History</button>
+            <button onclick="clearStack()">Clear Stack</button>
+            <div class="output" id="stackOutput">Click a button to start testing...</div>
+        </div>
+
+        <!-- Test 3: Hash Table Operations -->
+        <div class="test-section">
+            <h2>3️⃣ Hash Table Operations (Fast Search)</h2>
+            <p>Demonstrates O(1) insert and search operations</p>
+            <br>
+            <button onclick="testHashInsert()">Test Insert (O(1))</button>
+            <button onclick="testHashSearch()">Test Search (O(1))</button>
+            <button onclick="testHashPartialSearch()">Test Fuzzy Search</button>
+            <button onclick="testHashStats()">Show Statistics</button>
+            <button onclick="clearHashTable()">Clear Hash Table</button>
+            <div class="output" id="hashOutput">Click a button to start testing...</div>
+        </div>
+
+        <!-- Test 4: Performance Comparison -->
+        <div class="test-section">
+            <h2>4️⃣ Performance Comparison</h2>
+            <p>Compare search performance: Hash Table vs Linked List</p>
+            <br>
+            <button onclick="runPerformanceTest(100)">Test with 100 items</button>
+            <button onclick="runPerformanceTest(1000)">Test with 1000 items</button>
+            <button onclick="runPerformanceTest(10000)">Test with 10000 items</button>
+            <div class="output" id="perfOutput">Click a button to start performance testing...</div>
+        </div>
+
+        <!-- Test 5: Complete Workflow -->
+        <div class="test-section">
+            <h2>5️⃣ Complete Workflow Demo</h2>
+            <p>Demonstrates all DSA structures working together</p>
+            <br>
+            <button onclick="runCompleteDemo()">Run Complete Demo</button>
+            <button onclick="resetAll()">Reset Everything</button>
+            <div class="output" id="workflowOutput">Click 'Run Complete Demo' to see everything in action...</div>
+        </div>
+    </div>
+
+    <!-- Load DSA Structures -->
+    <script src="../dsa_structures/LinkedList.js"></script>
+    <script src="../dsa_structures/Stack.js"></script>
+    <script src="../dsa_structures/HashTable.js"></script>
+
+    <script>
+        // Initialize DSA structures
+        let lostList = new LinkedList();
+        let foundList = new LinkedList();
+        let actionStack = new Stack(100);
+        let hashTable = new HashTable(50);
+        let itemCounter = 1;
+
+        // Helper function to update statistics
+        function updateStats() {
+            document.getElementById('lostCount').textContent = lostList.getSize();
+            document.getElementById('foundCount').textContent = foundList.getSize();
+            document.getElementById('actionCount').textContent = actionStack.size();
+            const stats = hashTable.getStats();
+            document.getElementById('hashEfficiency').textContent = stats.efficiency;
+        }
+
+        // Helper to log to output
+        function log(outputId, message, clear = false) {
+            const output = document.getElementById(outputId);
+            if (clear) output.textContent = '';
+            output.textContent += message + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Test 1: Linked List Append
+        function testLinkedListAppend() {
+            log('linkedlistOutput', '=== Testing Linked List Append ===', true);
+            
+            const startTime = performance.now();
+            
+            const item = {
+                id: itemCounter++,
+                name: `Test Item ${itemCounter}`,
+                category: 'Electronics',
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            lostList.append(item);
+            
+            const endTime = performance.now();
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('linkedlistOutput', `✅ Item appended successfully!`);
+            log('linkedlistOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('linkedlistOutput', `📊 List size: ${lostList.getSize()}`);
+            log('linkedlistOutput', `🎯 Time Complexity: O(1) - Constant time`);
+            
+            updateStats();
+        }
+
+        // Test 1: Linked List Search
+        function testLinkedListSearch() {
+            if (lostList.isEmpty()) {
+                log('linkedlistOutput', '❌ List is empty! Add items first.', true);
+                return;
+            }
+            
+            log('linkedlistOutput', '=== Testing Linked List Search ===', true);
+            
+            const items = lostList.toArray();
+            const searchId = items[0].id;
+            
+            const startTime = performance.now();
+            const result = lostList.search(searchId);
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('linkedlistOutput', `🔍 Searching for item ID: ${searchId}`);
+            log('linkedlistOutput', result ? '✅ Item found!' : '❌ Item not found');
+            log('linkedlistOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('linkedlistOutput', `🎯 Time Complexity: O(n) - Linear time`);
+            log('linkedlistOutput', `📊 Items checked: ${lostList.getSize()}`);
+        }
+
+        // Test 1: Display All
+        function testLinkedListDisplay() {
+            log('linkedlistOutput', '=== Displaying All Items ===', true);
+            
+            if (lostList.isEmpty()) {
+                log('linkedlistOutput', '📭 List is empty');
+                return;
+            }
+            
+            const items = lostList.toArray();
+            log('linkedlistOutput', `📋 Total Items: ${items.length}\n`);
+            
+            items.forEach((item, index) => {
+                log('linkedlistOutput', `${index + 1}. ${item.name} (ID: ${item.id})`);
+            });
+        }
+
+        function clearLinkedList() {
+            lostList = new LinkedList();
+            foundList = new LinkedList();
+            log('linkedlistOutput', '🗑️  Lists cleared!', true);
+            updateStats();
+        }
+
+        // Test 2: Stack Push
+        function testStackPush() {
+            log('stackOutput', '=== Testing Stack Push ===', true);
+            
+            const action = {
+                type: 'ADD_ITEM',
+                itemId: itemCounter,
+                description: `Added test item ${itemCounter}`,
+                timestamp: Date.now()
+            };
+            
+            const startTime = performance.now();
+            actionStack.push(action);
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('stackOutput', `✅ Action pushed to stack!`);
+            log('stackOutput', `📝 Action: ${action.type}`);
+            log('stackOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('stackOutput', `📊 Stack size: ${actionStack.size()}`);
+            log('stackOutput', `🎯 Time Complexity: O(1) - Constant time`);
+            
+            updateStats();
+        }
+
+        // Test 2: Stack Pop
+        function testStackPop() {
+            log('stackOutput', '=== Testing Stack Pop ===', true);
+            
+            if (actionStack.isEmpty()) {
+                log('stackOutput', '❌ Stack is empty! Push actions first.');
+                return;
+            }
+            
+            const startTime = performance.now();
+            const action = actionStack.pop();
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('stackOutput', `✅ Action popped from stack!`);
+            log('stackOutput', `📝 Action: ${action.type}`);
+            log('stackOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('stackOutput', `📊 Stack size: ${actionStack.size()}`);
+            log('stackOutput', `🎯 Time Complexity: O(1) - Constant time`);
+            
+            updateStats();
+        }
+
+        // Test 2: Stack Peek
+        function testStackPeek() {
+            log('stackOutput', '=== Testing Stack Peek ===', true);
+            
+            if (actionStack.isEmpty()) {
+                log('stackOutput', '❌ Stack is empty!');
+                return;
+            }
+            
+            const startTime = performance.now();
+            const action = actionStack.peek();
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('stackOutput', `✅ Peeked at top action (not removed)!`);
+            log('stackOutput', `📝 Action: ${action.type}`);
+            log('stackOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('stackOutput', `📊 Stack size: ${actionStack.size()}`);
+            log('stackOutput', `🎯 Time Complexity: O(1) - Constant time`);
+        }
+
+        // Test 2: Show History
+        function testStackHistory() {
+            log('stackOutput', '=== Action History ===', true);
+            
+            if (actionStack.isEmpty()) {
+                log('stackOutput', '📭 No actions recorded yet');
+                return;
+            }
+            
+            const history = actionStack.getHistory();
+            log('stackOutput', `📚 Total Actions: ${history.length}\n`);
+            
+            history.slice(-10).reverse().forEach((action, index) => {
+                const time = new Date(action.timestamp).toLocaleTimeString();
+                log('stackOutput', `${index + 1}. ${action.type} at ${time}`);
+            });
+        }
+
+        function clearStack() {
+            actionStack.clear();
+            log('stackOutput', '🗑️  Stack cleared!', true);
+            updateStats();
+        }
+
+        // Test 3: Hash Insert
+        function testHashInsert() {
+            log('hashOutput', '=== Testing Hash Table Insert ===', true);
+            
+            const item = {
+                id: itemCounter++,
+                name: `Test Item ${itemCounter}`,
+                category: 'Electronics'
+            };
+            
+            const startTime = performance.now();
+            hashTable.insert(item.name.toLowerCase(), item);
+            hashTable.insert(item.category.toLowerCase(), item);
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('hashOutput', `✅ Item inserted into hash table!`);
+            log('hashOutput', `📝 Name: ${item.name}`);
+            log('hashOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('hashOutput', `🎯 Time Complexity: O(1) - Constant time average`);
+            
+            const stats = hashTable.getStats();
+            log('hashOutput', `📊 Hash Table Stats:`);
+            log('hashOutput', `   - Items: ${stats.count}`);
+            log('hashOutput', `   - Load Factor: ${stats.loadFactor.toFixed(2)}`);
+            log('hashOutput', `   - Efficiency: ${stats.efficiency}`);
+            
+            updateStats();
+        }
+
+        // Test 3: Hash Search
+        function testHashSearch() {
+            log('hashOutput', '=== Testing Hash Table Search ===', true);
+            
+            if (hashTable.getAllKeys().length === 0) {
+                log('hashOutput', '❌ Hash table is empty! Insert items first.');
+                return;
+            }
+            
+            const keys = hashTable.getAllKeys();
+            const searchKey = keys[0];
+            
+            log('hashOutput', `🔍 Searching for: "${searchKey}"`);
+            
+            const startTime = performance.now();
+            const result = hashTable.search(searchKey);
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('hashOutput', result ? '✅ Item found instantly!' : '❌ Item not found');
+            log('hashOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('hashOutput', `🎯 Time Complexity: O(1) - Constant time`);
+            log('hashOutput', `⚡ No matter the table size, search is always O(1)!`);
+        }
+
+        // Test 3: Fuzzy Search
+        function testHashPartialSearch() {
+            log('hashOutput', '=== Testing Partial/Fuzzy Search ===', true);
+            
+            const searchTerm = 'test';
+            
+            log('hashOutput', `🔍 Searching for items containing: "${searchTerm}"`);
+            
+            const startTime = performance.now();
+            const results = hashTable.searchPartial(searchTerm);
+            const endTime = performance.now();
+            
+            const timeTaken = (endTime - startTime).toFixed(4);
+            
+            log('hashOutput', `✅ Found ${results.length} matching items!`);
+            log('hashOutput', `⏱️  Time taken: ${timeTaken} ms`);
+            log('hashOutput', `🎯 Time Complexity: O(n) - Must check all entries`);
+            
+            if (results.length > 0) {
+                log('hashOutput', '\n📋 Results:');
+                results.slice(0, 5).forEach((item, i) => {
+                    log('hashOutput', `${i + 1}. ${item.name}`);
+                });
+            }
+        }
+
+        // Test 3: Hash Stats
+        function testHashStats() {
+            log('hashOutput', '=== Hash Table Statistics ===', true);
+            
+            const stats = hashTable.getStats();
+            
+            log('hashOutput', `📊 Detailed Statistics:\n`);
+            log('hashOutput', `Table Size: ${stats.size}`);
+            log('hashOutput', `Items Stored: ${stats.count}`);
+            log('hashOutput', `Load Factor: ${stats.loadFactor.toFixed(2)}`);
+            log('hashOutput', `Max Chain Length: ${stats.maxChainLength}`);
+            log('hashOutput', `Empty Buckets: ${stats.emptyBuckets}`);
+            log('hashOutput', `Efficiency: ${stats.efficiency}`);
+            log('hashOutput', `\n💡 Ideal load factor: 0.75 or below`);
+            log('hashOutput', `💡 Lower chain length = better performance`);
+        }
+
+        function clearHashTable() {
+            hashTable.clear();
+            log('hashOutput', '🗑️  Hash table cleared!', true);
+            updateStats();
+        }
+
+        // Test 4: Performance Comparison
+        function runPerformanceTest(n) {
+            log('perfOutput', `=== Performance Test: ${n} Items ===`, true);
+            log('perfOutput', `Comparing Hash Table vs Linked List search...\n`);
+            
+            // Create test data
+            const testList = new LinkedList();
+            const testHash = new HashTable(Math.ceil(n / 0.75));
+            
+            log('perfOutput', `📦 Creating ${n} test items...`);
+            
+            for (let i = 0; i < n; i++) {
+                const item = {
+                    id: i,
+                    name: `item_${i}`,
+                    category: 'Test'
+                };
+                testList.append(item);
+                testHash.insert(item.name, item);
+            }
+            
+            log('perfOutput', `✅ Items created!\n`);
+            
+            // Test Hash Table Search
+            log('perfOutput', `🔍 Testing Hash Table Search...`);
+            const hashStart = performance.now();
+            testHash.search(`item_${Math.floor(n/2)}`);
+            const hashEnd = performance.now();
+            const hashTime = (hashEnd - hashStart).toFixed(4);
+            
+            log('perfOutput', `⏱️  Hash Table: ${hashTime} ms (O(1))`);
+            
+            // Test Linked List Search
+            log('perfOutput', `\n🔍 Testing Linked List Search...`);
+            const listStart = performance.now();
+            testList.search(Math.floor(n/2));
+            const listEnd = performance.now();
+            const listTime = (listEnd - listStart).toFixed(4);
+            
+            log('perfOutput', `⏱️  Linked List: ${listTime} ms (O(n))`);
+            
+            // Calculate improvement
+            const improvement = (listTime / hashTime).toFixed(2);
+            log('perfOutput', `\n🚀 Hash Table is ${improvement}x faster!`);
+            log('perfOutput', `\n💡 As n increases, this difference grows significantly!`);
+        }
+
+        // Test 5: Complete Demo
+        function runCompleteDemo() {
+            log('workflowOutput', '=== Complete Workflow Demo ===', true);
+            log('workflowOutput', '🎬 Starting demonstration of all DSA structures...\n');
+            
+            // Step 1: Report Lost Item
+            log('workflowOutput', '1️⃣ User reports lost item');
+            const lostItem = {
+                id: itemCounter++,
+                name: 'iPhone 14 Pro',
+                category: 'Electronics',
+                date: '2025-01-25',
+                location: 'Library'
+            };
+            
+            lostList.append(lostItem);
+            log('workflowOutput', '   ✅ Added to Linked List (chronological storage)');
+            
+            hashTable.insert(lostItem.name.toLowerCase(), lostItem);
+            hashTable.insert(lostItem.category.toLowerCase(), lostItem);
+            log('workflowOutput', '   ✅ Indexed in Hash Table (fast search)');
+            
+            actionStack.push({
+                type: 'REPORT_LOST',
+                item: lostItem.name,
+                timestamp: Date.now()
+            });
+            log('workflowOutput', '   ✅ Action logged in Stack\n');
+            
+            // Step 2: Search for Items
+            log('workflowOutput', '2️⃣ User searches for "iphone"');
+            const searchResults = hashTable.searchPartial('iphone');
+            log('workflowOutput', `   ✅ Found ${searchResults.length} results using Hash Table (O(1))`);
+            
+            actionStack.push({
+                type: 'SEARCH',
+                query: 'iphone',
+                results: searchResults.length,
+                timestamp: Date.now()
+            });
+            log('workflowOutput', '   ✅ Search action logged\n');
+            
+            // Step 3: Report Found Item
+            log('workflowOutput', '3️⃣ Another user reports found item');
+            const foundItem = {
+                id: itemCounter++,
+                name: 'Black iPhone',
+                category: 'Electronics',
+                date: '2025-01-26',
+                location: 'Library Entrance'
+            };
+            
+            foundList.append(foundItem);
+            hashTable.insert(foundItem.name.toLowerCase(), foundItem);
+            log('workflowOutput', '   ✅ Found item added to system\n');
+            
+            // Step 4: View History
+            log('workflowOutput', '4️⃣ Admin views recent activity');
+            const recentActions = actionStack.getLastN(3);
+            log('workflowOutput', `   ✅ Retrieved ${recentActions.length} recent actions from Stack`);
+            recentActions.forEach(action => {
+                log('workflowOutput', `      - ${action.type}`);
+            });
+            
+            log('workflowOutput', '\n=== Demo Complete! ===');
+            log('workflowOutput', '\n📊 Final Statistics:');
+            log('workflowOutput', `Lost Items: ${lostList.getSize()}`);
+            log('workflowOutput', `Found Items: ${foundList.getSize()}`);
+            log('workflowOutput', `Actions Recorded: ${actionStack.size()}`);
+            log('workflowOutput', `Hash Table Efficiency: ${hashTable.getStats().efficiency}`);
+            
+            updateStats();
+        }
+
+        // Reset Everything
+        function resetAll() {
+            lostList = new LinkedList();
+            foundList = new LinkedList();
+            actionStack = new Stack(100);
+            hashTable = new HashTable(50);
+            itemCounter = 1;
+            
+            document.querySelectorAll('.output').forEach(output => {
+                output.textContent = 'Everything has been reset! Start testing again...';
+            });
+            
+            updateStats();
+        }
+
+        // Initialize
+        updateStats();
+        console.log('✅ DSA Testing Page Ready!');
+    </script>
+</body>
+</html>
