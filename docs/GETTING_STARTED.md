@@ -12,20 +12,20 @@ I've set up the following structure for you:
 
 ```
 Lost_FoundPortal/
-├── backend/              # Backend logic (to be implemented)
-├── dsa_structures/       # ✅ DSA implementations (DONE!)
-│   ├── LinkedList.js     # Custom linked list implementation
-│   ├── Stack.js          # Custom stack implementation
-│   └── HashTable.js      # Custom hash table with chaining
+├── backend/              # Backend components
+│   ├── dsa_structures/   # ✅ DSA implementations (DONE!)
+│   │   ├── LinkedList.js # Custom linked list implementation
+│   │   ├── Stack.js      # Custom stack implementation
+│   │   └── HashTable.js  # Custom hash table with chaining
+│   └── dsa_structures_c/ # C reference implementations
 ├── frontend/             # ✅ Basic UI (DONE!)
 │   ├── css/
 │   │   └── style.css     # Complete styling
 │   ├── js/
+│   │   ├── firebase-config.js # Firebase configuration
 │   │   └── main.js       # Main application logic
 │   ├── images/           # For item images
 │   └── index.html        # Main page with Bootstrap
-├── database/             # ✅ Database schema (DONE!)
-│   └── schema.sql        # Complete MySQL schema
 ├── docs/                 # Documentation folder
 └── README.md             # Project overview
 ```
@@ -37,13 +37,14 @@ Lost_FoundPortal/
 ### ✅ What You Have:
 
 1. **Three DSA Structures Implemented**:
-   - `LinkedList.js` - Stores lost/found items sequentially
-   - `Stack.js` - Tracks all actions (add, search, view)
-   - `HashTable.js` - Enables O(1) fast search
+   - `backend/dsa_structures/LinkedList.js` - Stores lost/found items sequentially
+   - `backend/dsa_structures/Stack.js` - Tracks all actions (add, search, view)
+   - `backend/dsa_structures/HashTable.js` - Enables O(1) fast search
 
-2. **Database Schema**:
-   - Complete MySQL schema with tables, views, and procedures
-   - Ready to import into MySQL
+2. **Firebase Integration**:
+   - Cloud Firestore for data persistence
+   - Real-time updates
+   - No local database setup required
 
 3. **Frontend Interface**:
    - Responsive HTML page with Bootstrap
@@ -71,9 +72,9 @@ Lost_FoundPortal/
 
 **Open and read these files in order:**
 
-1. `dsa_structures/LinkedList.js` - See how items are stored
-2. `dsa_structures/Stack.js` - See how actions are tracked
-3. `dsa_structures/HashTable.js` - See how search works
+1. `backend/dsa_structures/LinkedList.js` - See how items are stored
+2. `backend/dsa_structures/Stack.js` - See how actions are tracked
+3. `backend/dsa_structures/HashTable.js` - See how search works
 4. `frontend/js/main.js` - See how everything works together
 
 ### Step 3: Check Console Output
@@ -160,30 +161,20 @@ itemHashTable.searchPartial(key);  // Fuzzy search - O(n)
    - Display DSA statistics
    - Manage items
 
-### Option B: Add Backend (For Full-Stack)
+### Option B: Understand Firebase Integration
 
-1. **Set Up MySQL Database**:
-   ```bash
-   mysql -u root -p < database/schema.sql
-   ```
+1. **Check Firebase Configuration**:
+   - Open `frontend/js/firebase-config.js`
+   - See how Firestore is configured
 
-2. **Create Backend API** (choose one):
-   
-   **Option A: Node.js + Express**:
-   ```bash
-   cd backend
-   npm init -y
-   npm install express mysql2 cors
-   ```
+2. **Understand Data Flow**:
+   - Items saved to both DSA structures AND Firebase
+   - DSA structures for fast in-memory operations
+   - Firebase for persistence across sessions
 
-   **Option B: PHP**:
-   - Set up XAMPP/WAMP
-   - Create PHP endpoints in backend folder
-
-3. **Connect Frontend to Backend**:
-   - Replace sample data with API calls
-   - Store DSA operations in database
-   - Sync frontend and backend
+3. **Test Real-time Features**:
+   - Add an item and see it save to cloud
+   - Refresh page and see items load from Firebase
 
 ---
 

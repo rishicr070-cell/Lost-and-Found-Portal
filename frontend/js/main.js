@@ -15,7 +15,7 @@ let itemIdCounter = 1;
 /**
  * Initialize the application
  */
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     console.log('=== Lost & Found Portal Initialized ===');
     console.log('DSA Structures Created:');
     console.log('✓ Linked List for Lost Items');
@@ -23,19 +23,69 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('✓ Stack for Action History');
     console.log('✓ Hash Table for Fast Search');
 
-    // Load sample data
-    loadSampleData();
-
-    // Set up event listeners
+    // Set up event listeners first
     setupEventListeners();
+
+    // Load data from Firebase
+    await loadDataFromFirebase();
 
     // Display initial data
     displayRecentItems();
     updateStatistics();
 
+    // Auto-load claims for logged-in user
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            loadMyClaims(user.email);
+        }
+    });
+
     // Show DSA structure info in console
     displayDSAInfo();
 });
+
+/**
+ * Load items from Firebase Firestore
+ */
+async function loadDataFromFirebase() {
+    try {
+        console.log('📥 Loading items from Firebase...');
+
+        const snapshot = await db.collection('items').orderBy('createdAt', 'desc').get();
+
+        if (snapshot.empty) {
+            console.log('No items in database. Loading sample data...');
+            loadSampleData();
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const item = { id: doc.id, ...doc.data() };
+
+            // Add to appropriate LinkedList
+            if (item.type === 'lost') {
+                lostItemsList.append(item);
+            } else {
+                foundItemsList.append(item);
+            }
+
+            // Add to HashTable for O(1) search
+            itemHashTable.insert(item.name.toLowerCase(), item);
+            itemHashTable.insert(item.category.toLowerCase(), item);
+        });
+
+        // Update item counter
+        itemIdCounter = snapshot.size + 1;
+
+        console.log(`✅ Loaded ${snapshot.size} items from Firebase`);
+        showNotification(`Loaded ${snapshot.size} items from database`, 'info');
+
+    } catch (error) {
+        console.error('❌ Error loading from Firebase:', error);
+        console.log('Loading sample data instead...');
+        loadSampleData();
+    }
+}
 
 /**
  * Load sample data for testing
@@ -183,9 +233,8 @@ function setupEventListeners() {
 /**
  * Submit Lost Item
  */
-function submitLostItem() {
+async function submitLostItem() {
     const item = {
-        id: itemIdCounter++,
         name: document.getElementById('lostItemName').value,
         category: document.getElementById('lostItemCategory').value,
         description: document.getElementById('lostItemDescription').value,
@@ -193,49 +242,61 @@ function submitLostItem() {
         location: document.getElementById('lostItemLocation').value,
         color: document.getElementById('lostItemColor').value || 'Not specified',
         contact: document.getElementById('lostItemContact').value,
-        type: 'lost'
+        type: 'lost',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // Add to LinkedList
-    lostItemsList.append(item);
+    try {
+        // Save to Firebase
+        const docRef = await db.collection('items').add(item);
+        item.id = docRef.id;
+        console.log('✅ Item saved to Firebase with ID:', docRef.id);
 
-    // Add to HashTable for O(1) search
-    itemHashTable.insert(item.name.toLowerCase(), item);
-    itemHashTable.insert(item.category.toLowerCase(), item);
+        // Add to LinkedList
+        lostItemsList.append(item);
 
-    // Log action to Stack
-    actionStack.push({
-        type: 'ADD_LOST_ITEM',
-        itemId: item.id,
-        itemName: item.name,
-        timestamp: Date.now()
-    });
+        // Add to HashTable for O(1) search
+        itemHashTable.insert(item.name.toLowerCase(), item);
+        itemHashTable.insert(item.category.toLowerCase(), item);
 
-    console.log('✓ Lost item added:', item.name);
-    console.log('  - Added to LinkedList');
-    console.log('  - Added to HashTable');
-    console.log('  - Action logged to Stack');
+        // Log action to Stack
+        actionStack.push({
+            type: 'ADD_LOST_ITEM',
+            itemId: item.id,
+            itemName: item.name,
+            timestamp: Date.now()
+        });
 
-    // Update UI
-    displayRecentItems();
-    updateStatistics();
+        console.log('✓ Lost item added:', item.name);
+        console.log('  - Saved to Firebase');
+        console.log('  - Added to LinkedList');
+        console.log('  - Added to HashTable');
+        console.log('  - Action logged to Stack');
 
-    // Reset form
-    document.getElementById('lostItemForm').reset();
+        // Update UI
+        displayRecentItems();
+        updateStatistics();
 
-    // Show success message
-    showNotification('Lost item reported successfully!', 'success');
+        // Reset form
+        document.getElementById('lostItemForm').reset();
 
-    // Scroll to recent items
-    document.getElementById('recentLostItems').scrollIntoView({ behavior: 'smooth' });
+        // Show success message
+        showNotification('Lost item reported and saved to database!', 'success');
+
+        // Scroll to recent items
+        document.getElementById('recentLostItems').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('❌ Error saving to Firebase:', error);
+        showNotification('Error saving item. Please try again.', 'danger');
+    }
 }
 
 /**
  * Submit Found Item
  */
-function submitFoundItem() {
+async function submitFoundItem() {
     const item = {
-        id: itemIdCounter++,
         name: document.getElementById('foundItemName').value,
         category: document.getElementById('foundItemCategory').value,
         description: document.getElementById('foundItemDescription').value,
@@ -243,41 +304,54 @@ function submitFoundItem() {
         location: document.getElementById('foundItemLocation').value,
         color: document.getElementById('foundItemColor').value || 'Not specified',
         contact: document.getElementById('foundItemContact').value,
-        type: 'found'
+        type: 'found',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // Add to LinkedList
-    foundItemsList.append(item);
+    try {
+        // Save to Firebase
+        const docRef = await db.collection('items').add(item);
+        item.id = docRef.id;
+        console.log('✅ Item saved to Firebase with ID:', docRef.id);
 
-    // Add to HashTable for O(1) search
-    itemHashTable.insert(item.name.toLowerCase(), item);
-    itemHashTable.insert(item.category.toLowerCase(), item);
+        // Add to LinkedList
+        foundItemsList.append(item);
 
-    // Log action to Stack
-    actionStack.push({
-        type: 'ADD_FOUND_ITEM',
-        itemId: item.id,
-        itemName: item.name,
-        timestamp: Date.now()
-    });
+        // Add to HashTable for O(1) search
+        itemHashTable.insert(item.name.toLowerCase(), item);
+        itemHashTable.insert(item.category.toLowerCase(), item);
 
-    console.log('✓ Found item added:', item.name);
-    console.log('  - Added to LinkedList');
-    console.log('  - Added to HashTable');
-    console.log('  - Action logged to Stack');
+        // Log action to Stack
+        actionStack.push({
+            type: 'ADD_FOUND_ITEM',
+            itemId: item.id,
+            itemName: item.name,
+            timestamp: Date.now()
+        });
 
-    // Update UI
-    displayRecentItems();
-    updateStatistics();
+        console.log('✓ Found item added:', item.name);
+        console.log('  - Saved to Firebase');
+        console.log('  - Added to LinkedList');
+        console.log('  - Added to HashTable');
+        console.log('  - Action logged to Stack');
 
-    // Reset form
-    document.getElementById('foundItemForm').reset();
+        // Update UI
+        displayRecentItems();
+        updateStatistics();
 
-    // Show success message
-    showNotification('Found item reported successfully! Thank you for your help!', 'success');
+        // Reset form
+        document.getElementById('foundItemForm').reset();
 
-    // Scroll to recent items
-    document.getElementById('recentFoundItems').scrollIntoView({ behavior: 'smooth' });
+        // Show success message
+        showNotification('Found item reported and saved to database! Thank you!', 'success');
+
+        // Scroll to recent items
+        document.getElementById('recentFoundItems').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('❌ Error saving to Firebase:', error);
+        showNotification('Error saving item. Please try again.', 'danger');
+    }
 }
 
 /**
@@ -385,9 +459,15 @@ function displayRecentItems() {
 /**
  * Create HTML for an item card
  */
-function createItemCard(item) {
+function createItemCard(item, showClaimButton = false, oppositeItemId = null) {
     const badgeClass = item.type === 'lost' ? 'badge-lost' : 'badge-found';
     const iconClass = item.type === 'lost' ? 'bi-exclamation-circle' : 'bi-check-circle';
+
+    const claimButtonHtml = showClaimButton ? `
+        <button class="btn btn-sm btn-warning w-100 mt-2" onclick="promptClaimItem('${oppositeItemId}', '${item.id}', '${item.type}')">
+            <i class="bi bi-hand-thumbs-up"></i> Claim This Item
+        </button>
+    ` : '';
 
     return `
         <div class="card item-card h-100">
@@ -410,12 +490,37 @@ function createItemCard(item) {
                         <i class="bi bi-palette"></i> ${item.color}
                     </small>
                 </div>
-                <button class="btn btn-sm btn-primary w-100" onclick="viewItemDetails(${item.id})">
+                <button class="btn btn-sm btn-primary w-100" onclick="viewItemDetails('${item.id}')">
                     View Details
                 </button>
+                ${claimButtonHtml}
             </div>
         </div>
     `;
+}
+
+/**
+ * Initiate claim using logged-in user's email
+ */
+function promptClaimItem(lostItemId, foundItemId, itemType) {
+    // Get current user from Firebase Auth
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        showNotification('Please login to claim items.', 'warning');
+        return;
+    }
+
+    const userEmail = user.email;
+
+    // Determine correct order based on item type
+    if (itemType === 'lost') {
+        // User clicked on a lost item, so they found something
+        initiateClaim(lostItemId, foundItemId, userEmail);
+    } else {
+        // User clicked on a found item, so they lost something
+        initiateClaim(foundItemId, lostItemId, userEmail);
+    }
 }
 
 /**
@@ -446,11 +551,21 @@ function updateStatistics() {
 }
 
 /**
- * View item details (placeholder)
+ * View item details in a modal
  */
 function viewItemDetails(itemId) {
     console.log(`Viewing details for item ID: ${itemId}`);
-    showNotification('Item details feature coming soon!', 'info');
+
+    // Search for item in both lists
+    let item = lostItemsList.search(itemId);
+    if (!item) {
+        item = foundItemsList.search(itemId);
+    }
+
+    if (!item) {
+        showNotification('Item not found', 'danger');
+        return;
+    }
 
     // Log action to Stack
     actionStack.push({
@@ -458,6 +573,108 @@ function viewItemDetails(itemId) {
         itemId: itemId,
         timestamp: Date.now()
     });
+
+    // Create or get modal
+    let modal = document.getElementById('itemDetailsModal');
+    if (!modal) {
+        // Create modal if it doesn't exist
+        const modalHtml = `
+            <div class="modal fade" id="itemDetailsModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="itemDetailsModalLabel">Item Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="itemDetailsModalBody">
+                            <!-- Content will be inserted here -->
+                        </div>
+                        <div class="modal-footer" id="itemDetailsModalFooter">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        modal = document.getElementById('itemDetailsModal');
+    }
+
+    // Populate modal with item details
+    const badgeClass = item.type === 'lost' ? 'bg-danger' : 'bg-success';
+    const iconClass = item.type === 'lost' ? 'bi-exclamation-circle' : 'bi-check-circle';
+
+    const modalBody = document.getElementById('itemDetailsModalBody');
+    modalBody.innerHTML = `
+        <div class="text-center mb-3">
+            <span class="badge ${badgeClass} p-2">
+                <i class="bi ${iconClass}"></i> ${item.type.toUpperCase()} ITEM
+            </span>
+        </div>
+        <div class="mb-3">
+            <h4 class="text-center">${item.name}</h4>
+            <p class="text-center text-muted"><span class="badge bg-secondary">${item.category}</span></p>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-6 mb-3">
+                <strong><i class="bi bi-calendar"></i> Date:</strong><br>
+                <span class="text-muted">${item.date}</span>
+            </div>
+            <div class="col-6 mb-3">
+                <strong><i class="bi bi-geo-alt"></i> Location:</strong><br>
+                <span class="text-muted">${item.location}</span>
+            </div>
+            <div class="col-6 mb-3">
+                <strong><i class="bi bi-palette"></i> Color:</strong><br>
+                <span class="text-muted">${item.color}</span>
+            </div>
+            <div class="col-6 mb-3">
+                <strong><i class="bi bi-envelope"></i> Contact:</strong><br>
+                <span class="text-muted">${item.contact}</span>
+            </div>
+        </div>
+        <div class="mb-3">
+            <strong><i class="bi bi-card-text"></i> Description:</strong><br>
+            <p class="text-muted">${item.description}</p>
+        </div>
+    `;
+
+    // Add claim button in footer
+    const modalFooter = document.getElementById('itemDetailsModalFooter');
+    modalFooter.innerHTML = `
+        <button type="button" class="btn btn-warning" onclick="promptClaimFromDetails('${item.id}', '${item.type}')">
+            <i class="bi bi-hand-thumbs-up"></i> Claim This Item
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    `;
+
+    // Show modal
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
+/**
+ * Initiate claim from details modal using logged-in user's email
+ */
+function promptClaimFromDetails(itemId, itemType) {
+    // Get current user from Firebase Auth
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        showNotification('Please login to claim items.', 'warning');
+        return;
+    }
+
+    const userEmail = user.email;
+
+    // Close the modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('itemDetailsModal'));
+    if (modal) modal.hide();
+
+    // For now, we need to find a matching item of opposite type
+    // This is a simplified version - in a real app, user would select which item to match
+    showNotification('Please search for a matching item and use the Claim button on the search results.', 'info');
 }
 
 /**
@@ -549,9 +766,279 @@ function displayDSAInfo() {
     console.log('\n=== END DSA INFO ===\n');
 }
 
+// ========================================
+// CLAIM VERIFICATION SYSTEM
+// ========================================
+
+/**
+ * Initiate a claim for matching lost and found items
+ * @param {string} lostItemId - ID of the lost item
+ * @param {string} foundItemId - ID of the found item
+ * @param {string} userEmail - Email of the person initiating the claim
+ */
+async function initiateClaim(lostItemId, foundItemId, userEmail) {
+    try {
+        // Get item details
+        const lostItem = lostItemsList.search(lostItemId);
+        const foundItem = foundItemsList.search(foundItemId);
+
+        if (!lostItem || !foundItem) {
+            showNotification('Item not found. Please try again.', 'danger');
+            return;
+        }
+
+        // Create claim object
+        const claim = {
+            lostItemId: lostItemId,
+            foundItemId: foundItemId,
+            lostItemReporter: lostItem.contact,
+            foundItemReporter: foundItem.contact,
+            initiatedBy: userEmail === lostItem.contact ? 'lost' : 'found',
+            status: 'pending',
+            lostItemApproval: userEmail === lostItem.contact ? true : null,
+            foundItemApproval: userEmail === foundItem.contact ? true : null,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lostItemName: lostItem.name,
+            foundItemName: foundItem.name
+        };
+
+        // Save to Firebase
+        const docRef = await db.collection('claims').add(claim);
+        claim.id = docRef.id;
+
+        console.log('✅ Claim initiated:', claim);
+
+        // Log action to Stack
+        actionStack.push({
+            type: ActionTypes.CLAIM_INITIATED,
+            claimId: claim.id,
+            lostItemId: lostItemId,
+            foundItemId: foundItemId,
+            initiatedBy: userEmail,
+            timestamp: Date.now()
+        });
+
+        showNotification('Claim request sent! Waiting for the other party to approve.', 'success');
+
+        // Reload claims
+        loadMyClaims(userEmail);
+
+    } catch (error) {
+        console.error('❌ Error initiating claim:', error);
+        showNotification('Error creating claim. Please try again.', 'danger');
+    }
+}
+
+/**
+ * Approve a claim
+ * @param {string} claimId - ID of the claim to approve
+ * @param {string} userEmail - Email of the user approving
+ */
+async function approveClaim(claimId, userEmail) {
+    try {
+        const claimRef = db.collection('claims').doc(claimId);
+        const claimDoc = await claimRef.get();
+
+        if (!claimDoc.exists) {
+            showNotification('Claim not found.', 'danger');
+            return;
+        }
+
+        const claim = claimDoc.data();
+
+        // Determine which approval to update
+        const updates = {
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (userEmail === claim.lostItemReporter) {
+            updates.lostItemApproval = true;
+        } else if (userEmail === claim.foundItemReporter) {
+            updates.foundItemApproval = true;
+        } else {
+            showNotification('You are not authorized to approve this claim.', 'danger');
+            return;
+        }
+
+        // Check if both parties have approved
+        const bothApproved = (updates.lostItemApproval || claim.lostItemApproval) &&
+            (updates.foundItemApproval || claim.foundItemApproval);
+
+        if (bothApproved) {
+            updates.status = 'approved';
+
+            // Delete both items from active listings
+            await db.collection('items').doc(claim.lostItemId).delete();
+            await db.collection('items').doc(claim.foundItemId).delete();
+
+            // Remove from DSA structures
+            lostItemsList.delete(claim.lostItemId);
+            foundItemsList.delete(claim.foundItemId);
+            itemHashTable.delete(claim.lostItemId);
+            itemHashTable.delete(claim.foundItemId);
+
+            // Log to Stack
+            actionStack.push({
+                type: ActionTypes.ITEM_CLAIMED,
+                claimId: claimId,
+                lostItemId: claim.lostItemId,
+                foundItemId: claim.foundItemId,
+                timestamp: Date.now()
+            });
+
+            showNotification('🎉 Claim approved! Both items have been removed from listings.', 'success');
+
+            // Update UI
+            displayRecentItems();
+            updateStatistics();
+        } else {
+            showNotification('Claim approved! Waiting for the other party to approve.', 'success');
+        }
+
+        // Update claim in Firebase
+        await claimRef.update(updates);
+
+        // Log action to Stack
+        actionStack.push({
+            type: ActionTypes.CLAIM_APPROVED,
+            claimId: claimId,
+            approvedBy: userEmail,
+            timestamp: Date.now()
+        });
+
+        // Reload claims
+        loadMyClaims(userEmail);
+
+    } catch (error) {
+        console.error('❌ Error approving claim:', error);
+        showNotification('Error approving claim. Please try again.', 'danger');
+    }
+}
+
+/**
+ * Reject a claim
+ * @param {string} claimId - ID of the claim to reject
+ * @param {string} userEmail - Email of the user rejecting
+ */
+async function rejectClaim(claimId, userEmail) {
+    try {
+        const claimRef = db.collection('claims').doc(claimId);
+        const claimDoc = await claimRef.get();
+
+        if (!claimDoc.exists) {
+            showNotification('Claim not found.', 'danger');
+            return;
+        }
+
+        const claim = claimDoc.data();
+
+        // Verify user is authorized
+        if (userEmail !== claim.lostItemReporter && userEmail !== claim.foundItemReporter) {
+            showNotification('You are not authorized to reject this claim.', 'danger');
+            return;
+        }
+
+        // Update claim status
+        await claimRef.update({
+            status: 'rejected',
+            rejectedBy: userEmail,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Log action to Stack
+        actionStack.push({
+            type: ActionTypes.CLAIM_REJECTED,
+            claimId: claimId,
+            rejectedBy: userEmail,
+            timestamp: Date.now()
+        });
+
+        showNotification('Claim rejected.', 'info');
+
+        // Reload claims
+        loadMyClaims(userEmail);
+
+    } catch (error) {
+        console.error('❌ Error rejecting claim:', error);
+        showNotification('Error rejecting claim. Please try again.', 'danger');
+    }
+}
+
+/**
+ * Load claims for a specific user
+ * @param {string} userEmail - Email of the user
+ */
+async function loadMyClaims(userEmail) {
+    try {
+        const claimsContainer = document.getElementById('myClaimsContainer');
+        if (!claimsContainer) return;
+
+        // Query claims where user is involved
+        const snapshot = await db.collection('claims')
+            .where('status', '==', 'pending')
+            .get();
+
+        const userClaims = [];
+        snapshot.forEach(doc => {
+            const claim = { id: doc.id, ...doc.data() };
+            if (claim.lostItemReporter === userEmail || claim.foundItemReporter === userEmail) {
+                userClaims.push(claim);
+            }
+        });
+
+        if (userClaims.length === 0) {
+            claimsContainer.innerHTML = '<p class="text-center text-muted">No pending claims</p>';
+            return;
+        }
+
+        // Display claims
+        claimsContainer.innerHTML = '';
+        userClaims.forEach(claim => {
+            const isLostReporter = claim.lostItemReporter === userEmail;
+            const needsApproval = isLostReporter ? !claim.lostItemApproval : !claim.foundItemApproval;
+            const otherPartyApproved = isLostReporter ? claim.foundItemApproval : claim.lostItemApproval;
+
+            const claimCard = `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6>Claim Match</h6>
+                        <p><strong>Lost Item:</strong> ${claim.lostItemName}</p>
+                        <p><strong>Found Item:</strong> ${claim.foundItemName}</p>
+                        <p><small class="text-muted">
+                            ${otherPartyApproved ? '✅ Other party has approved' : '⏳ Waiting for other party'}
+                        </small></p>
+                        ${needsApproval ? `
+                            <div class="btn-group w-100">
+                                <button class="btn btn-success" onclick="approveClaim('${claim.id}', '${userEmail}')">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </button>
+                                <button class="btn btn-danger" onclick="rejectClaim('${claim.id}', '${userEmail}')">
+                                    <i class="bi bi-x-circle"></i> Reject
+                                </button>
+                            </div>
+                        ` : '<p class="text-success mb-0">✅ You have approved this claim</p>'}
+                    </div>
+                </div>
+            `;
+            claimsContainer.insertAdjacentHTML('beforeend', claimCard);
+        });
+
+    } catch (error) {
+        console.error('❌ Error loading claims:', error);
+    }
+}
+
+
 // Make functions globally accessible
 window.viewItemDetails = viewItemDetails;
 window.performSearch = performSearch;
+window.initiateClaim = initiateClaim;
+window.approveClaim = approveClaim;
+window.rejectClaim = rejectClaim;
+window.loadMyClaims = loadMyClaims;
+window.promptClaimItem = promptClaimItem;
+window.promptClaimFromDetails = promptClaimFromDetails;
 
 // Log that everything is ready
 console.log('✓ All event listeners set up');

@@ -13,17 +13,17 @@ This project implements a web-based lost and found portal for campus use, showca
 
 ```
 Lost_FoundPortal/
-├── backend/              # PHP/Node.js backend logic
-├── dsa_structures/       # Custom DSA implementations
-│   ├── LinkedList.js     # Linked list for item storage
-│   ├── Stack.js          # Stack for action tracking
-│   └── HashTable.js      # Hash table for fast search
+├── backend/              # Backend components
+│   ├── dsa_structures/   # Custom DSA implementations
+│   │   ├── LinkedList.js # Linked list for item storage
+│   │   ├── Stack.js      # Stack for action tracking
+│   │   └── HashTable.js  # Hash table for fast search
+│   └── dsa_structures_c/ # C reference implementations
 ├── frontend/             # HTML/CSS/JS interface
 │   ├── css/              # Stylesheets
 │   ├── js/               # JavaScript files
 │   ├── images/           # Images and assets
 │   └── index.html        # Main page
-├── database/             # SQL schema and migrations
 ├── docs/                 # Documentation and reports
 └── README.md
 ```
@@ -57,8 +57,7 @@ Lost_FoundPortal/
 ## 🛠️ Technology Stack
 
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap
-- **Backend**: PHP/Node.js (choose one)
-- **Database**: MySQL
+- **Backend**: Firebase Firestore (NoSQL Cloud Database)
 - **DSA**: Custom JavaScript implementations
 
 ## 📊 Time Complexity Goals
@@ -79,10 +78,9 @@ Lost_FoundPortal/
 
 ### Installation Steps
 1. Clone the repository
-2. Set up MySQL database (see `database/schema.sql`)
-3. Install dependencies
-4. Configure database connection
-5. Run the application
+2. Open `frontend/index.html` in a browser
+3. Configure Firebase (credentials in `firebase-config.js`)
+4. Start reporting and finding items!
 
 ## 📝 Next Steps
 
