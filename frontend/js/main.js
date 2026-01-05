@@ -37,6 +37,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             loadMyClaims(user.email);
+            // Load notifications
+            if (typeof loadMyNotifications === 'function') {
+                loadMyNotifications();
+            }
         }
     });
 
@@ -289,6 +293,9 @@ async function submitLostItem() {
     } catch (error) {
         console.error('❌ Error saving to Firebase:', error);
         showNotification('Error saving item. Please try again.', 'danger');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Report Item';
     }
 }
 
@@ -296,19 +303,29 @@ async function submitLostItem() {
  * Submit Found Item
  */
 async function submitFoundItem() {
-    const item = {
-        name: document.getElementById('foundItemName').value,
-        category: document.getElementById('foundItemCategory').value,
-        description: document.getElementById('foundItemDescription').value,
-        date: document.getElementById('foundItemDate').value,
-        location: document.getElementById('foundItemLocation').value,
-        color: document.getElementById('foundItemColor').value || 'Not specified',
-        contact: document.getElementById('foundItemContact').value,
-        type: 'found',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    const submitBtn = document.getElementById('submitFoundItemBtn');
 
     try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Uploading...';
+
+        const item = {
+            name: document.getElementById('foundItemName').value,
+            category: document.getElementById('foundItemCategory').value,
+            description: document.getElementById('foundItemDescription').value,
+            date: document.getElementById('foundItemDate').value,
+            location: document.getElementById('foundItemLocation').value,
+            color: document.getElementById('foundItemColor').value || 'Not specified',
+            contact: document.getElementById('foundItemContact').value,
+            type: 'found',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const imageFile = document.getElementById('foundItemImage').files[0];
+        if (imageFile) {
+            item.imageUrl = await uploadImage(imageFile, 'found', 'foundItemUploadProgress');
+        }
+
         // Save to Firebase
         const docRef = await db.collection('items').add(item);
         item.id = docRef.id;
@@ -330,10 +347,6 @@ async function submitFoundItem() {
         });
 
         console.log('✓ Found item added:', item.name);
-        console.log('  - Saved to Firebase');
-        console.log('  - Added to LinkedList');
-        console.log('  - Added to HashTable');
-        console.log('  - Action logged to Stack');
 
         // Update UI
         displayRecentItems();
@@ -341,9 +354,10 @@ async function submitFoundItem() {
 
         // Reset form
         document.getElementById('foundItemForm').reset();
+        document.getElementById('foundItemImagePreview').innerHTML = '';
 
         // Show success message
-        showNotification('Found item reported and saved to database! Thank you!', 'success');
+        showNotification('Found item reported! The owner can now claim it.', 'success');
 
         // Scroll to recent items
         document.getElementById('recentFoundItems').scrollIntoView({ behavior: 'smooth' });
@@ -351,6 +365,9 @@ async function submitFoundItem() {
     } catch (error) {
         console.error('❌ Error saving to Firebase:', error);
         showNotification('Error saving item. Please try again.', 'danger');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Report Found Item';
     }
 }
 
@@ -464,16 +481,24 @@ function createItemCard(item, showClaimButton = false, oppositeItemId = null) {
     const iconClass = item.type === 'lost' ? 'bi-exclamation-circle' : 'bi-check-circle';
 
     const claimButtonHtml = showClaimButton ? `
-        <button class="btn btn-sm btn-warning w-100 mt-2" onclick="promptClaimItem('${oppositeItemId}', '${item.id}', '${item.type}')">
+        <button class="btn btn-sm btn-warning w-100 mt-2" onclick="claimItem('${item.id}')">
             <i class="bi bi-hand-thumbs-up"></i> Claim This Item
         </button>
     ` : '';
 
+    // Display image or icon placeholder
+    const imageHtml = item.imageUrl ? `
+        <img src="${item.imageUrl}" class="card-img-top" alt="${item.name}" 
+             style="height: 200px; object-fit: cover;">
+    ` : `
+        <div class="item-image-placeholder">
+            <i class="bi ${getIconForCategory(item.category)}"></i>
+        </div>
+    `;
+
     return `
         <div class="card item-card h-100">
-            <div class="item-image-placeholder">
-                <i class="bi ${getIconForCategory(item.category)}"></i>
-            </div>
+            ${imageHtml}
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="item-badge ${badgeClass}">
@@ -604,8 +629,17 @@ function viewItemDetails(itemId) {
     const badgeClass = item.type === 'lost' ? 'bg-danger' : 'bg-success';
     const iconClass = item.type === 'lost' ? 'bi-exclamation-circle' : 'bi-check-circle';
 
+    // Image display
+    const imageHtml = item.imageUrl ? `
+        <div class="text-center mb-3">
+            <img src="${item.imageUrl}" class="img-fluid rounded" alt="${item.name}" 
+                 style="max-height: 300px; object-fit: contain;">
+        </div>
+    ` : '';
+
     const modalBody = document.getElementById('itemDetailsModalBody');
     modalBody.innerHTML = `
+        ${imageHtml}
         <div class="text-center mb-3">
             <span class="badge ${badgeClass} p-2">
                 <i class="bi ${iconClass}"></i> ${item.type.toUpperCase()} ITEM
@@ -643,15 +677,20 @@ function viewItemDetails(itemId) {
     // Add claim button in footer
     const modalFooter = document.getElementById('itemDetailsModalFooter');
     modalFooter.innerHTML = `
-        <button type="button" class="btn btn-warning" onclick="promptClaimFromDetails('${item.id}', '${item.type}')">
+        <button type="button" class="btn btn-warning" onclick="claimItem('${item.id}')">
             <i class="bi bi-hand-thumbs-up"></i> Claim This Item
         </button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
     `;
 
-    // Show modal
+    // Show the modal
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
+
+    // Add explicit close handlers to ensure close works
+    modal.querySelector('.btn-close').onclick = () => bsModal.hide();
+    modal.querySelector('.btn-secondary').onclick = () => bsModal.hide();
+    modal.onclick = (e) => { if (e.target === modal) bsModal.hide(); };
 }
 
 /**

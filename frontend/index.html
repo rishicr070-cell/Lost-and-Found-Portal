@@ -32,13 +32,16 @@
                         <a class="nav-link active" href="#home">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#lost">Report Lost</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#found">Report Found</a>
+                        <a class="nav-link" href="#report">Report Item</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#search">Search Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#notifications">
+                            <i class="bi bi-bell"></i> Notifications
+                            <span id="notificationBadge" class="badge bg-danger d-none">0</span>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#claims">My Claims</a>
@@ -59,33 +62,23 @@
                 Lost something? Found something? We're here to help reunite items with their owners!
             </p>
             <div class="row justify-content-center">
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <i class="bi bi-exclamation-circle text-danger" style="font-size: 3rem;"></i>
-                            <h5 class="card-title mt-3">Lost an Item?</h5>
-                            <p class="card-text">Report your lost item and we'll help you find it</p>
-                            <a href="#lost" class="btn btn-danger">Report Lost Item</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-5 mb-3">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
                             <h5 class="card-title mt-3">Found an Item?</h5>
-                            <p class="card-text">Help someone by reporting what you found</p>
-                            <a href="#found" class="btn btn-success">Report Found Item</a>
+                            <p class="card-text">Report the item you found so the owner can claim it</p>
+                            <a href="#report" class="btn btn-success">Report Found Item</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-5 mb-3">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
                             <i class="bi bi-search text-primary" style="font-size: 3rem;"></i>
-                            <h5 class="card-title mt-3">Search Items</h5>
-                            <p class="card-text">Browse through lost and found items</p>
-                            <a href="#search" class="btn btn-primary">Search Now</a>
+                            <h5 class="card-title mt-3">Lost Something?</h5>
+                            <p class="card-text">Search for your lost item and claim it if found</p>
+                            <a href="#search" class="btn btn-primary">Search Items</a>
                         </div>
                     </div>
                 </div>
@@ -146,76 +139,8 @@
         </div>
     </section>
 
-    <!-- Report Lost Item Section -->
-    <section id="lost" class="report-section py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center mb-4"><i class="bi bi-exclamation-circle text-danger"></i> Report Lost Item</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="card shadow">
-                        <div class="card-body p-4">
-                            <form id="lostItemForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="lostItemName" class="form-label">Item Name *</label>
-                                        <input type="text" class="form-control" id="lostItemName" required
-                                            placeholder="e.g., iPhone 13, Blue Backpack">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="lostItemCategory" class="form-label">Category *</label>
-                                        <select class="form-select" id="lostItemCategory" required>
-                                            <option value="">Select Category</option>
-                                            <option value="Electronics">Electronics</option>
-                                            <option value="Documents">Documents</option>
-                                            <option value="Accessories">Accessories</option>
-                                            <option value="Keys">Keys</option>
-                                            <option value="Clothing">Clothing</option>
-                                            <option value="Books">Books</option>
-                                            <option value="Sports Equipment">Sports Equipment</option>
-                                            <option value="Personal Items">Personal Items</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="lostItemDescription" class="form-label">Description *</label>
-                                    <textarea class="form-control" id="lostItemDescription" rows="3" required
-                                        placeholder="Describe the item in detail..."></textarea>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <label for="lostItemDate" class="form-label">Date Lost *</label>
-                                        <input type="date" class="form-control" id="lostItemDate" required>
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="lostItemLocation" class="form-label">Location *</label>
-                                        <input type="text" class="form-control" id="lostItemLocation" required
-                                            placeholder="e.g., Library 2nd Floor">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label for="lostItemColor" class="form-label">Color</label>
-                                        <input type="text" class="form-control" id="lostItemColor"
-                                            placeholder="e.g., Black, Blue">
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="lostItemContact" class="form-label">Contact Email *</label>
-                                    <input type="email" class="form-control" id="lostItemContact" required
-                                        placeholder="your.email@campus.edu">
-                                </div>
-                                <button type="submit" class="btn btn-danger w-100">
-                                    <i class="bi bi-plus-circle"></i> Report Lost Item
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Report Found Item Section -->
-    <section id="found" class="report-section py-5">
+    <!-- Report Item Section -->
+    <section id="report" class="report-section py-5 bg-light">
         <div class="container">
             <h2 class="text-center mb-4"><i class="bi bi-check-circle text-success"></i> Report Found Item</h2>
             <div class="row justify-content-center">
@@ -271,11 +196,38 @@
                                     <input type="email" class="form-control" id="foundItemContact" required
                                         placeholder="your.email@campus.edu">
                                 </div>
-                                <button type="submit" class="btn btn-success w-100">
+                                <div class="mb-3">
+                                    <label for="foundItemImage" class="form-label">Item Photo (Optional)</label>
+                                    <input type="file" class="form-control" id="foundItemImage" accept="image/*"
+                                        capture="environment">
+                                    <small class="text-muted">Take a photo or upload from gallery</small>
+                                    <div id="foundItemImagePreview" class="mt-2"></div>
+                                </div>
+                                <div id="foundItemUploadProgress" class="progress d-none mb-3" style="height: 25px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                        role="progressbar" style="width: 0%">0%</div>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100" id="submitFoundItemBtn">
                                     <i class="bi bi-plus-circle"></i> Report Found Item
                                 </button>
                             </form>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notifications Section -->
+    <section id="notifications" class="notifications-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-4"><i class="bi bi-bell"></i> Notifications</h2>
+            <p class="text-center text-muted mb-4">Claim requests for your items</p>
+
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div id="notificationsContainer">
+                        <p class="text-center text-muted">Loading notifications...</p>
                     </div>
                 </div>
             </div>
@@ -335,6 +287,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <!-- Firebase Configuration -->
     <script>
@@ -353,6 +306,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+        const storage = firebase.storage();
         console.log("✅ Firebase initialized successfully!");
     </script>
 
@@ -363,6 +317,15 @@
     <script src="../backend/dsa_structures/LinkedList.js"></script>
     <script src="../backend/dsa_structures/Stack.js"></script>
     <script src="../backend/dsa_structures/HashTable.js"></script>
+
+    <!-- Image Upload Module -->
+    <script src="js/image-upload.js"></script>
+
+    <!-- Notification System -->
+    <script src="js/notifications.js"></script>
+
+    <!-- Modal Fix -->
+    <script src="js/modal-fix.js"></script>
 
     <!-- Custom JS -->
     <script src="js/main.js"></script>

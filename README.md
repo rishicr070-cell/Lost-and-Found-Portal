@@ -4,10 +4,18 @@ A campus lost and found management system demonstrating practical implementation
 
 ## 📋 Project Overview
 
-This project implements a web-based lost and found portal for campus use, showcasing core data structures:
-- **Linked Lists**: Store and manage sequences of lost/found items
+This project implements a web-based lost and found portal for RVCE campus, showcasing core data structures:
+- **Linked Lists**: Store and manage sequences of items
 - **Stacks**: Track action history (add/update/delete operations)
 - **Hash Tables**: Enable O(1) search by item name/category
+
+## ✨ Features
+
+- 🔐 **Authentication**: Firebase Auth with @rvce.edu.in email restriction
+- 📸 **Image Upload**: Photos stored as compressed Base64 in Firestore (no extra storage needed)
+- 🔔 **Notifications**: Claim requests notify item owners
+- ✅ **Mark as Retrieved**: Owners can mark items as found and remove them
+- 🔍 **Fast Search**: O(1) search using custom Hash Table
 
 ## 🏗️ Project Structure
 
@@ -21,49 +29,38 @@ Lost_FoundPortal/
 │   └── dsa_structures_c/ # C reference implementations
 ├── frontend/             # HTML/CSS/JS interface
 │   ├── css/              # Stylesheets
-│   ├── js/               # JavaScript files
-│   ├── images/           # Images and assets
-│   └── index.html        # Main page
-├── docs/                 # Documentation and reports
+│   ├── js/               # JavaScript modules
+│   │   ├── main.js       # Core application logic
+│   │   ├── auth.js       # Authentication module
+│   │   ├── image-upload.js # Base64 image handling
+│   │   └── notifications.js # Claim notification system
+│   └── index.html        # Main portal page
+├── docs/                 # Documentation
 └── README.md
 ```
 
-## 🚀 Development Phases
-
-### Phase 1: Requirement Analysis & Design ✅ (Current Phase)
-- [ ] Define user requirements and pain points
-- [ ] Design database schema (users, lost_items, found_items)
-- [ ] Map DSA structures to features
-- [ ] Create UI wireframes
-
-### Phase 2: DSA Implementation & Backend
-- [ ] Implement LinkedList class
-- [ ] Implement Stack class
-- [ ] Implement HashTable with chaining
-- [ ] Integrate with backend API
-
-### Phase 3: Frontend Development
-- [ ] Build responsive UI with Bootstrap
-- [ ] Create report forms
-- [ ] Implement search interface
-- [ ] Build admin dashboard
-
-### Phase 4: Testing & Deployment
-- [ ] Test core workflows
-- [ ] Verify time complexities
-- [ ] Performance testing
-- [ ] Create deployment guide
-
 ## 🛠️ Technology Stack
 
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap
-- **Backend**: Firebase Firestore (NoSQL Cloud Database)
-- **DSA**: Custom JavaScript implementations
+| Component | Technology |
+|-----------|------------|
+| Frontend | HTML5, CSS3, JavaScript, Bootstrap 5 |
+| Database | Firebase Firestore (NoSQL) |
+| Auth | Firebase Authentication |
+| Images | Base64 (stored in Firestore) |
+| DSA | Custom JavaScript implementations |
 
-## 📊 Time Complexity Goals
+## 📸 Image Storage
 
-| Operation | Data Structure | Target Complexity |
-|-----------|---------------|-------------------|
+Images are stored as **Base64 strings** directly in Firestore documents:
+- ✅ No Firebase Storage setup required
+- ✅ Works within free Firestore quota
+- ✅ Images auto-compressed to max 800px, 70% quality
+- ⚠️ Max image size: 2MB before compression
+
+## 📊 Time Complexity
+
+| Operation | Data Structure | Complexity |
+|-----------|---------------|------------|
 | Search by name | Hash Table | O(1) |
 | Add item | Linked List | O(1) |
 | Undo action | Stack | O(1) |
@@ -72,22 +69,26 @@ Lost_FoundPortal/
 ## 🎯 Getting Started
 
 ### Prerequisites
-- Node.js or PHP installed
-- MySQL installed
-- Basic knowledge of HTML/CSS/JavaScript
+- Modern web browser
+- Firebase project (free tier works)
 
-### Installation Steps
+### Firebase Setup
+1. Create project at [Firebase Console](https://console.firebase.google.com)
+2. Enable **Email/Password** authentication
+3. Create Firestore database
+4. Copy config to `firebase-config.js`
+
+### Run Locally
 1. Clone the repository
-2. Open `frontend/index.html` in a browser
-3. Configure Firebase (credentials in `firebase-config.js`)
-4. Start reporting and finding items!
+2. Open `frontend/index.html` in browser
+3. Sign up with @rvce.edu.in email
+4. Start reporting items!
 
-## 📝 Next Steps
+## 🔄 User Flow
 
-1. Start with DSA structure implementation
-2. Design and create database schema
-3. Build basic frontend pages
-4. Connect frontend to backend APIs
+```
+Report Item → Item Displayed → Someone Claims → Owner Notified → Mark as Retrieved → Item Removed
+```
 
 ## 👥 Contributors
 
