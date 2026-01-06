@@ -7,17 +7,25 @@
  * Claim an item - creates notification for original poster
  */
 async function claimItem(itemId) {
+    console.log('🎯 claimItem called for itemId:', itemId);
+
     const user = firebase.auth().currentUser;
 
     if (!user) {
+        console.log('   ❌ User not logged in');
         showNotification('Please login to claim items.', 'warning');
         return;
     }
 
+    console.log('   ✅ User logged in:', user.email);
+
     try {
         // Get the item
+        console.log('   📥 Fetching item from Firestore...');
         const itemDoc = await db.collection('items').doc(itemId).get();
+
         if (!itemDoc.exists) {
+            console.log('   ❌ Item not found in Firestore');
             showNotification('Item not found', 'danger');
             return;
         }
@@ -25,8 +33,16 @@ async function claimItem(itemId) {
         const item = itemDoc.data();
         item.id = itemDoc.id;
 
+        console.log('   ✅ Item found:', {
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            contact: item.contact
+        });
+
         // Can't claim your own item
         if (item.contact === user.email) {
+            console.log('   ⚠️ User trying to claim their own item');
             showNotification('You cannot claim your own item', 'warning');
             return;
         }
@@ -43,12 +59,21 @@ async function claimItem(itemId) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await db.collection('notifications').add(notification);
+        console.log('   📝 Creating notification:', notification);
+
+        const notifRef = await db.collection('notifications').add(notification);
+
+        console.log('   ✅ Notification created with ID:', notifRef.id);
+        console.log('   📧 Notification sent to:', item.contact);
 
         showNotification(`Claim request sent to ${item.contact}`, 'success');
 
     } catch (error) {
-        console.error('❌ Error claiming item:', error);
+        console.error('   ❌ Error claiming item:', error);
+        console.error('   Error details:', {
+            code: error.code,
+            message: error.message
+        });
         showNotification('Failed to claim item', 'danger');
     }
 }
@@ -94,67 +119,109 @@ async function markAsRetrieved(itemId, notificationId) {
 }
 
 /**
- * Load notifications for logged-in user
+ * Real-time notification listener
  */
-async function loadMyNotifications() {
+let notificationUnsubscribe = null;
+
+/**
+ * Load notifications for logged-in user with real-time updates
+ */
+function loadMyNotifications() {
     const user = firebase.auth().currentUser;
-    if (!user) return;
 
-    try {
-        const snapshot = await db.collection('notifications')
-            .where('originalPosterEmail', '==', user.email)
-            .where('status', '==', 'pending')
-            .get();
+    console.log('🔔 loadMyNotifications called');
+    console.log('   User:', user ? user.email : 'Not logged in');
 
-        const notificationsContainer = document.getElementById('notificationsContainer');
-        if (!notificationsContainer) return;
-
-        if (snapshot.empty) {
-            notificationsContainer.innerHTML = '<p class="text-center text-muted">No notifications</p>';
-            return;
-        }
-
-        let html = '';
-        snapshot.forEach(doc => {
-            const notif = doc.data();
-            notif.id = doc.id;
-
-            html += `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h6 class="card-title">
-                            <i class="bi bi-bell-fill text-warning"></i> 
-                            Someone claimed your ${notif.itemType} item
-                        </h6>
-                        <p class="mb-2"><strong>${notif.itemName}</strong></p>
-                        <p class="text-muted small mb-3">
-                            ${notif.claimerEmail} claims this is their item
-                        </p>
-                        <button class="btn btn-success btn-sm" 
-                                onclick="markAsRetrieved('${notif.itemId}', '${notif.id}')">
-                            <i class="bi bi-check-circle"></i> Mark as Retrieved
-                        </button>
-                        <button class="btn btn-secondary btn-sm" 
-                                onclick="dismissNotification('${notif.id}')">
-                            Dismiss
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-
-        notificationsContainer.innerHTML = html;
-
-        // Update notification badge
-        const badge = document.getElementById('notificationBadge');
-        if (badge) {
-            badge.textContent = snapshot.size;
-            badge.classList.remove('d-none');
-        }
-
-    } catch (error) {
-        console.error('❌ Error loading notifications:', error);
+    if (!user) {
+        console.log('   ❌ No user logged in, skipping notification load');
+        return;
     }
+
+    const notificationsContainer = document.getElementById('notificationsContainer');
+    if (!notificationsContainer) {
+        console.log('   ❌ notificationsContainer element not found');
+        return;
+    }
+
+    // Unsubscribe from previous listener if exists
+    if (notificationUnsubscribe) {
+        notificationUnsubscribe();
+    }
+
+    console.log('   📡 Setting up real-time listener for:', user.email);
+
+    // Set up real-time listener
+    notificationUnsubscribe = db.collection('notifications')
+        .where('originalPosterEmail', '==', user.email)
+        .where('status', '==', 'pending')
+        .onSnapshot((snapshot) => {
+            console.log('   📬 Notification snapshot received');
+            console.log('   Total notifications:', snapshot.size);
+
+            if (snapshot.empty) {
+                console.log('   ℹ️ No pending notifications');
+                notificationsContainer.innerHTML = '<p class="text-center text-muted">No notifications</p>';
+
+                // Hide badge
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.classList.add('d-none');
+                }
+                return;
+            }
+
+            let html = '';
+            snapshot.forEach(doc => {
+                const notif = doc.data();
+                notif.id = doc.id;
+
+                console.log('   📧 Notification:', {
+                    id: notif.id,
+                    itemName: notif.itemName,
+                    claimerEmail: notif.claimerEmail
+                });
+
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="bi bi-bell-fill text-warning"></i> 
+                                Someone claimed your ${notif.itemType} item
+                            </h6>
+                            <p class="mb-2"><strong>${notif.itemName}</strong></p>
+                            <p class="text-muted small mb-3">
+                                ${notif.claimerEmail} claims this is their item
+                            </p>
+                            <button class="btn btn-success btn-sm" 
+                                    onclick="markAsRetrieved('${notif.itemId}', '${notif.id}')">
+                                <i class="bi bi-check-circle"></i> Mark as Retrieved
+                            </button>
+                            <button class="btn btn-secondary btn-sm" 
+                                    onclick="dismissNotification('${notif.id}')">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            notificationsContainer.innerHTML = html;
+
+            // Update notification badge
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                badge.textContent = snapshot.size;
+                badge.classList.remove('d-none');
+                console.log('   ✅ Badge updated:', snapshot.size);
+            }
+
+        }, (error) => {
+            console.error('   ❌ Error in notification listener:', error);
+            console.error('   Error details:', {
+                code: error.code,
+                message: error.message
+            });
+        });
 }
 
 /**

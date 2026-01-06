@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System - Lost & Found Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-5 text-gradient">🎨 Design System Reference</h1>
+
+        <!-- Colors -->
+        <section class="mb-5">
+            <h2 class="mb-4">Color Palette</h2>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div
+                                style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; margin-bottom: 1rem;">
+                            </div>
+                            <h6>Primary Gradient</h6>
+                            <small class="text-muted">#667eea → #764ba2</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div
+                                style="height: 100px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 12px; margin-bottom: 1rem;">
+                            </div>
+                            <h6>Success Gradient</h6>
+                            <small class="text-muted">#11998e → #38ef7d</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div
+                                style="height: 100px; background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); border-radius: 12px; margin-bottom: 1rem;">
+                            </div>
+                            <h6>Danger Gradient</h6>
+                            <small class="text-muted">#eb3349 → #f45c43</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div
+                                style="height: 100px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; margin-bottom: 1rem;">
+                            </div>
+                            <h6>Warning Gradient</h6>
+                            <small class="text-muted">#f093fb → #f5576c</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buttons -->
+        <section class="mb-5">
+            <h2 class="mb-4">Buttons</h2>
+            <div class="d-flex flex-wrap gap-3">
+                <button class="btn btn-primary"><i class="bi bi-search"></i> Primary</button>
+                <button class="btn btn-success"><i class="bi bi-check-circle"></i> Success</button>
+                <button class="btn btn-danger"><i class="bi bi-x-circle"></i> Danger</button>
+                <button class="btn btn-warning"><i class="bi bi-exclamation-triangle"></i> Warning</button>
+                <button class="btn btn-secondary"><i class="bi bi-info-circle"></i> Secondary</button>
+            </div>
+            <div class="d-flex flex-wrap gap-3 mt-3">
+                <button class="btn btn-primary btn-sm">Small Button</button>
+                <button class="btn btn-success">Regular Button</button>
+                <button class="btn btn-danger" style="padding: 1rem 2rem;">Large Button</button>
+            </div>
+        </section>
+
+        <!-- Cards -->
+        <section class="mb-5">
+            <h2 class="mb-4">Cards</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card item-card">
+                        <div class="item-image-placeholder">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="item-badge badge-lost">
+                                    <i class="bi bi-exclamation-circle"></i> LOST
+                                </span>
+                                <span class="badge bg-secondary">Electronics</span>
+                            </div>
+                            <h5>iPhone 13</h5>
+                            <p class="text-muted">Black iPhone with blue case</p>
+                            <button class="btn btn-primary btn-sm w-100">View Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card item-card">
+                        <div class="item-image-placeholder">
+                            <i class="bi bi-key"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="item-badge badge-found">
+                                    <i class="bi bi-check-circle"></i> FOUND
+                                </span>
+                                <span class="badge bg-secondary">Keys</span>
+                            </div>
+                            <h5>Set of Keys</h5>
+                            <p class="text-muted">Keys with Toyota keychain</p>
+                            <button class="btn btn-success btn-sm w-100">Claim Item</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-bell"></i> Notification Card
+                        </div>
+                        <div class="card-body">
+                            <h6>Someone claimed your item!</h6>
+                            <p class="text-muted mb-3">user@rvce.edu.in claims this is their item</p>
+                            <button class="btn btn-success btn-sm">Approve</button>
+                            <button class="btn btn-secondary btn-sm">Dismiss</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Forms -->
+        <section class="mb-5">
+            <h2 class="mb-4">Form Elements</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Text Input</label>
+                                <input type="text" class="form-control" placeholder="Enter text...">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Select Dropdown</label>
+                                <select class="form-select">
+                                    <option>Choose option...</option>
+                                    <option>Option 1</option>
+                                    <option>Option 2</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Textarea</label>
+                                <textarea class="form-control" rows="3" placeholder="Enter description..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="mb-3">Search Bar</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" placeholder="Search items..."
+                                    style="border-radius: 50px 0 0 50px;">
+                                <button class="btn btn-primary" style="border-radius: 0 50px 50px 0;">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                            </div>
+                            <h6 class="mb-3 mt-4">Progress Bar</h6>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 75%">75%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Badges -->
+        <section class="mb-5">
+            <h2 class="mb-4">Badges & Pills</h2>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge bg-primary">Primary</span>
+                <span class="badge bg-success">Success</span>
+                <span class="badge bg-danger">Danger</span>
+                <span class="badge bg-warning">Warning</span>
+                <span class="badge bg-info">Info</span>
+                <span class="badge bg-secondary">Secondary</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="item-badge badge-lost"><i class="bi bi-exclamation-circle"></i> LOST</span>
+                <span class="item-badge badge-found"><i class="bi bi-check-circle"></i> FOUND</span>
+            </div>
+        </section>
+
+        <!-- Icons -->
+        <section class="mb-5">
+            <h2 class="mb-4">Common Icons</h2>
+            <div class="row text-center">
+                <div class="col-2 mb-3">
+                    <i class="bi bi-search" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <p class="small mt-2">Search</p>
+                </div>
+                <div class="col-2 mb-3">
+                    <i class="bi bi-bell" style="font-size: 2rem; color: var(--warning-color);"></i>
+                    <p class="small mt-2">Notifications</p>
+                </div>
+                <div class="col-2 mb-3">
+                    <i class="bi bi-check-circle" style="font-size: 2rem; color: var(--success-color);"></i>
+                    <p class="small mt-2">Success</p>
+                </div>
+                <div class="col-2 mb-3">
+                    <i class="bi bi-x-circle" style="font-size: 2rem; color: var(--danger-color);"></i>
+                    <p class="small mt-2">Error</p>
+                </div>
+                <div class="col-2 mb-3">
+                    <i class="bi bi-phone" style="font-size: 2rem; color: var(--info-color);"></i>
+                    <p class="small mt-2">Electronics</p>
+                </div>
+                <div class="col-2 mb-3">
+                    <i class="bi bi-key" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <p class="small mt-2">Keys</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Animations -->
+        <section class="mb-5">
+            <h2 class="mb-4">Animations Demo</h2>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card fade-in">
+                        <div class="card-body text-center">
+                            <i class="bi bi-stars" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Fade In</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card scale-in">
+                        <div class="card-body text-center">
+                            <i class="bi bi-zoom-in" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Scale In</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card hover-lift">
+                        <div class="card-body text-center">
+                            <i class="bi bi-arrow-up" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">Hover Lift</h6>
+                            <small class="text-muted">Hover me!</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-bell" style="font-size: 2rem; animation: ring 2s infinite;"></i>
+                            <h6 class="mt-2">Ring Animation</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="mb-5">
+            <h2 class="mb-4">Typography</h2>
+            <div class="card">
+                <div class="card-body">
+                    <h1>Heading 1 - Inter Font</h1>
+                    <h2>Heading 2 - Inter Font</h2>
+                    <h3>Heading 3 - Inter Font</h3>
+                    <h4>Heading 4 - Inter Font</h4>
+                    <h5>Heading 5 - Inter Font</h5>
+                    <h6>Heading 6 - Inter Font</h6>
+                    <p class="lead">Lead paragraph - Larger text for emphasis</p>
+                    <p>Regular paragraph text with good readability and spacing.</p>
+                    <p class="text-muted">Muted text for secondary information</p>
+                    <p class="text-gradient">Gradient text for special emphasis</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Back Button -->
+        <div class="text-center mt-5">
+            <a href="index.html" class="btn btn-primary btn-lg">
+                <i class="bi bi-arrow-left"></i> Back to Portal
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

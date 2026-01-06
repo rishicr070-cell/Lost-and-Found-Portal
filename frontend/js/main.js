@@ -287,6 +287,9 @@ async function submitLostItem() {
         // Show success message
         showNotification('Lost item reported and saved to database!', 'success');
 
+        // Check for Smart Matches
+        checkForMatches(item);
+
         // Scroll to recent items
         document.getElementById('recentLostItems').scrollIntoView({ behavior: 'smooth' });
 
@@ -358,6 +361,9 @@ async function submitFoundItem() {
 
         // Show success message
         showNotification('Found item reported! The owner can now claim it.', 'success');
+
+        // Check for Smart Matches
+        checkForMatches(item);
 
         // Scroll to recent items
         document.getElementById('recentFoundItems').scrollIntoView({ behavior: 'smooth' });
@@ -1083,3 +1089,170 @@ window.promptClaimFromDetails = promptClaimFromDetails;
 console.log('✓ All event listeners set up');
 console.log('✓ Application ready to use!');
 console.log('\nTry searching for: "iphone", "electronics", "keys", etc.');
+
+/**
+ * Check for Smart Matches after item submission
+ * Uses the SmartMatcher match service
+ */
+function checkForMatches(newItem) {
+    if (typeof smartMatcher === 'undefined') {
+        console.warn('SmartMatcher not loaded');
+        return;
+    }
+
+    console.log('🔍 Checking for Smart Matches...');
+
+    let potentialMatches = [];
+
+    // If looking for LOST item matches, check FOUND list
+    if (newItem.type === 'lost') {
+        const foundItems = foundItemsList.toArray();
+        potentialMatches = smartMatcher.findMatches(newItem, foundItems);
+    }
+    // If looking for FOUND item matches, check LOST list
+    else {
+        const lostItems = lostItemsList.toArray();
+        potentialMatches = smartMatcher.findMatches(newItem, lostItems);
+    }
+
+    console.log(`   Found ${potentialMatches.length} potential matches`);
+
+    if (potentialMatches.length > 0) {
+        showMatchModal(newItem, potentialMatches);
+    }
+}
+
+/**
+ * Show Match Modal
+ */
+function showMatchModal(newItem, matches) {
+    // Take top 3 matches
+    const topMatches = matches.slice(0, 3);
+
+    // Create modal HTML
+    let matchesHtml = '';
+
+    topMatches.forEach(match => {
+        const item = match.item;
+        const score = Math.round(match.score * 100);
+
+        // Color code score
+        let scoreColor = 'bg-secondary';
+        if (score > 80) scoreColor = 'bg-success';
+        else if (score > 60) scoreColor = 'bg-warning';
+
+        // Claim action based on type
+        // If I reported LOST, I want to CLAIM the FOUND item (item.id)
+        // If I reported FOUND, I want to CONTACT the LOST item reporter (item.id)
+        let actionBtn = '';
+        if (newItem.type === 'lost') {
+            actionBtn = `<button class="btn btn-sm btn-success" onclick="claimItem('${item.id}'); bootstrap.Modal.getInstance(document.getElementById('matchModal')).hide();">Claim This</button>`;
+        } else {
+            actionBtn = `<button class="btn btn-sm btn-primary" onclick="window.location.href='mailto:${item.contact}'">Contact Owner</button>`;
+        }
+
+        matchesHtml += `
+            <div class="card mb-3 border-${score > 80 ? 'success' : 'warning'}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="card-title mb-1">
+                                ${item.name} 
+                                <span class="badge ${scoreColor}">${score}% Match</span>
+                            </h6>
+                            <p class="text-muted small mb-2">${item.description}</p>
+                            <span class="badge bg-light text-dark border">${item.color}</span>
+                            <span class="text-muted small ms-2"><i class="bi bi-geo-alt"></i> ${item.location}</span>
+                        </div>
+                        <div class="text-end">
+                            ${actionBtn}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    const modalHtml = `
+        <div class="modal fade" id="matchModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-gradient-brand text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h5 class="modal-title">
+                            <i class="bi bi-stars"></i> Potential Matches Found!
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-success">
+                            Good news! We found items that match your report.
+                        </div>
+                        <div class="matches-list">
+                            ${matchesHtml}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if any
+    const existingModal = document.getElementById('matchModal');
+    if (existingModal) existingModal.remove();
+
+    // Add to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Show
+    const matchModal = new bootstrap.Modal(document.getElementById('matchModal'));
+    matchModal.show();
+}
+
+// Make globally available
+window.checkForMatches = checkForMatches;
+
+/**
+ * Initialize Smart Search Tool
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const smartSearchForm = document.getElementById('smartSearchForm');
+
+    if (smartSearchForm) {
+        smartSearchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // 1. Get Values
+            const tempItem = {
+                name: document.getElementById('smartSearchName').value,
+                category: document.getElementById('smartSearchCategory').value,
+                description: document.getElementById('smartSearchDesc').value,
+                color: document.getElementById('smartSearchColor').value,
+                type: 'lost' // We are acting as a "Lost" reporter searching for "Found" items
+            };
+
+            // 2. Hide Search Modal
+            const searchModal = bootstrap.Modal.getInstance(document.getElementById('smartSearchModal'));
+            searchModal.hide();
+
+            // 3. Run Matching (Against FOUND items)
+            console.log('🔍 Running Smart Search for:', tempItem.name);
+            const foundItems = foundItemsList.toArray();
+
+            if (typeof smartMatcher !== 'undefined') {
+                const matches = smartMatcher.findMatches(tempItem, foundItems);
+                console.log(`   Found ${matches.length} matches`);
+
+                if (matches.length > 0) {
+                    showMatchModal(tempItem, matches);
+                } else {
+                    showNotification('No close matches found yet. Try simpler keywords.', 'info');
+                }
+            } else {
+                console.error('SmartMatcher not loaded');
+            }
+        });
+    }
+});
