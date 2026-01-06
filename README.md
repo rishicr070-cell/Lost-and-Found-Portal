@@ -90,10 +90,6 @@ Images are stored as **Base64 strings** directly in Firestore documents:
 Report Item → Item Displayed → Someone Claims → Owner Notified → Mark as Retrieved → Item Removed
 ```
 
-## 👥 Contributors
-
-Rishi - DSA Project Developer
-
 ## 📄 License
 
 Educational Project - Feel free to use for learning
