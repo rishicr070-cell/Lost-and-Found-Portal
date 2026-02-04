@@ -60,6 +60,15 @@ async function loadMyItems() {
         // Update tab badges
         updateTabBadges(allItems.length, lostItems.length, foundItems.length);
 
+        // Update statistics counters
+        const myLostItemsCount = document.getElementById('myLostItemsCount');
+        const myFoundItemsCount = document.getElementById('myFoundItemsCount');
+        const myTotalItemsCount = document.getElementById('myTotalItemsCount');
+
+        if (myLostItemsCount) myLostItemsCount.textContent = lostItems.length;
+        if (myFoundItemsCount) myFoundItemsCount.textContent = foundItems.length;
+        if (myTotalItemsCount) myTotalItemsCount.textContent = allItems.length;
+
     } catch (error) {
         console.error('Error loading user items:', error);
         showNotification('Error loading your items. Please try again.', 'danger');

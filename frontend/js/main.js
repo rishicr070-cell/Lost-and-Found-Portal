@@ -501,9 +501,9 @@ function displayRecentItems() {
     const recentLostDiv = document.getElementById('recentLostItems');
     const recentFoundDiv = document.getElementById('recentFoundItems');
 
-    // Get items from LinkedLists
-    const lostItems = lostItemsList.toArray().slice(-6).reverse();
-    const foundItems = foundItemsList.toArray().slice(-6).reverse();
+    // Get items from LinkedLists (limit to 3 most recent)
+    const lostItems = lostItemsList.toArray().slice(-3).reverse();
+    const foundItems = foundItemsList.toArray().slice(-3).reverse();
 
     // Display lost items
     if (lostItems.length === 0) {

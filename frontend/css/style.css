@@ -49,6 +49,106 @@
 }
 
 /* ============================================
+   DARK THEME
+   ============================================ */
+[data-theme="dark"] {
+    /* Dark Mode Color Palette */
+    --light-bg: #1a202c;
+    --white: #2d3748;
+    --dark-text: #e2e8f0;
+    --gray-text: #a0aec0;
+    --border-color: #4a5568;
+
+    /* Dark Mode Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Dark theme body background */
+[data-theme="dark"] body {
+    background-color: #1a202c;
+    color: #e2e8f0;
+}
+
+/* Dark theme cards */
+[data-theme="dark"] .card {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border-color: #4a5568;
+}
+
+/* Dark theme forms */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border-color: #4a5568;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    background-color: #374151;
+    color: #e2e8f0;
+    border-color: var(--primary-color);
+}
+
+/* Dark theme modals */
+[data-theme="dark"] .modal-content {
+    background-color: #2d3748;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .modal-footer {
+    background-color: #1a202c;
+}
+
+/* Dark theme badges */
+[data-theme="dark"] .badge {
+    background-color: #4a5568;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .badge.bg-danger {
+    background-color: #fc8181 !important;
+    color: #1a202c;
+}
+
+[data-theme="dark"] .badge.bg-success {
+    background-color: #68d391 !important;
+    color: #1a202c;
+}
+
+/* Dark theme text colors */
+[data-theme="dark"] .text-muted {
+    color: #a0aec0 !important;
+}
+
+[data-theme="dark"] .text-danger {
+    color: #fc8181 !important;
+}
+
+/* Dark theme empty states */
+[data-theme="dark"] .empty-state {
+    color: #a0aec0;
+}
+
+[data-theme="dark"] .empty-state h4 {
+    color: #e2e8f0;
+}
+
+/* Dark theme hero section */
+[data-theme="dark"] .hero-section.bg-light {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+}
+
+/* Dark theme stats section */
+[data-theme="dark"] .stats-section.bg-light {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%) !important;
+}
+
+/* ============================================
    2. GLOBAL STYLES
    ============================================ */
 * {
@@ -145,6 +245,27 @@ html {
     transition: var(--transition-base);
 }
 
+/* Use wider container on large screens */
+.navbar .container {
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+@media (min-width: 1400px) {
+    .navbar .container {
+        max-width: 1400px;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+@media (min-width: 1600px) {
+    .navbar .container {
+        max-width: 1600px;
+    }
+}
+
 .navbar-brand {
     font-weight: 700;
     font-size: 1.5rem;
@@ -175,12 +296,58 @@ html {
     }
 }
 
+/* Navbar Item Spacing - Better spacing on larger screens */
+.navbar-nav {
+    gap: 0.25rem;
+}
+
+.navbar-nav .nav-item {
+    margin: 0 0.15rem;
+}
+
 .nav-link {
     font-weight: 500;
     position: relative;
-    padding: 0.5rem 1rem !important;
+    padding: 0.5rem 0.75rem !important;
     transition: var(--transition-fast);
     border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Better spacing on larger screens */
+@media (min-width: 992px) {
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+
+    .navbar-nav .nav-item {
+        margin: 0 0.3rem;
+    }
+
+    .nav-link {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.95rem;
+    }
+}
+
+/* Extra spacing on very large screens */
+@media (min-width: 1400px) {
+    .navbar-nav {
+        gap: 0.75rem;
+    }
+
+    .navbar-nav .nav-item {
+        margin: 0 0.4rem;
+    }
+
+    .nav-link {
+        padding: 0.6rem 1.2rem !important;
+    }
+
+    .navbar-brand {
+        margin-right: 2rem;
+    }
 }
 
 .nav-link:hover {
@@ -193,11 +360,23 @@ html {
 }
 
 /* Notification Badge */
-#notificationBadge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    padding: 0.25rem 0.5rem;
+.nav-link i {
+    margin-right: 0.35rem;
+    font-size: 1rem;
+}
+
+.nav-link .badge {
+    margin-left: 0.25rem;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+
+#notificationBadge,
+#messagesBadge {
+    position: relative;
+    top: auto;
+    right: auto;
+    padding: 0.2rem 0.4rem;
     font-size: 0.7rem;
     border-radius: var(--radius-full);
     animation: bounce 1s infinite;
@@ -213,6 +392,114 @@ html {
     50% {
         transform: translateY(-5px);
     }
+}
+
+/* ============================================
+   DROPDOWN MENUS
+   ============================================ */
+.navbar .dropdown-menu {
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    min-width: 220px;
+    animation: dropdownSlideIn 0.3s ease;
+    background-color: white;
+    z-index: 1050;
+    display: none;
+}
+
+.navbar .dropdown-menu.show {
+    display: block;
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.navbar .dropdown-item {
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.navbar .dropdown-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.navbar .dropdown-item:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateX(5px);
+}
+
+.navbar .dropdown-item.text-danger:hover {
+    background: var(--danger-gradient);
+    color: white;
+}
+
+.navbar .dropdown-item-text {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+}
+
+.navbar .dropdown-divider {
+    margin: 0.5rem 0;
+    opacity: 0.1;
+}
+
+.navbar .dropdown-toggle::after {
+    margin-left: 0.5rem;
+    vertical-align: 0.15em;
+}
+
+/* Dark Theme Dropdown Styles */
+[data-theme="dark"] .navbar .dropdown-menu {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .navbar .dropdown-item {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .navbar .dropdown-item:hover {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+[data-theme="dark"] .navbar .dropdown-item.text-danger {
+    color: #fc8181;
+}
+
+[data-theme="dark"] .navbar .dropdown-item.text-danger:hover {
+    background: var(--danger-gradient);
+    color: white;
+}
+
+[data-theme="dark"] .navbar .dropdown-item-text {
+    color: #a0aec0;
+}
+
+[data-theme="dark"] .navbar .dropdown-divider {
+    border-color: #4a5568;
+    opacity: 0.3;
 }
 
 /* ============================================

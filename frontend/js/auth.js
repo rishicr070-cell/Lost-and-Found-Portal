@@ -246,6 +246,12 @@ function updateUIWithUser(user) {
         userDisplayName.textContent = emailName;
     }
 
+    // Update user email in dropdown
+    const userEmailText = document.getElementById('userEmailText');
+    if (userEmailText) {
+        userEmailText.textContent = user.email;
+    }
+
     // Add logout event listener
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {

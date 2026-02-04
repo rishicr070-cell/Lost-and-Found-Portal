@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse all found items in the Campus Lost & Found Portal">
+    <meta name="theme-color" content="#667eea">
+    <title>All Found Items - Lost & Found Portal</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3 class="mt-4">Loading Found Items...</h3>
+            <p class="text-muted">Please wait</p>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-search"></i> Lost & Found Portal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#home">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#report">
+                            <i class="bi bi-plus-circle"></i> Report Item
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#search">
+                            <i class="bi bi-search"></i> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#notifications">
+                            <i class="bi bi-bell"></i> Notifications
+                            <span id="notificationBadge" class="badge bg-danger d-none">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#claims">
+                            <i class="bi bi-hand-thumbs-up"></i> My Claims
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-items.html">
+                            <i class="bi bi-box-seam"></i> My Items
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="found-items.html">
+                            <i class="bi bi-check-circle"></i> All Found Items
+                        </a>
+                    </li>
+                    <li class="nav-item message-badge">
+                        <a class="nav-link" href="#" onclick="openMessagesModal(); return false;">
+                            <i class="bi bi-chat-dots"></i> Messages
+                            <span id="messagesBadge" class="badge bg-danger d-none">0</span>
+                        </a>
+                    </li>
+                    <!-- User Info & Logout Button -->
+                    <li class="nav-item">
+                        <span class="nav-link" id="userEmailDisplay" style="color: rgba(255,255,255,0.7);">
+                            <i class="bi bi-person-circle"></i> <span id="userDisplayName">User</span>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <div id="themeToggleContainer" class="nav-link" style="padding: 0;"></div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-logout" href="#" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section bg-light py-5">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4"><i class="bi bi-check-circle text-success"></i> All Found Items</h1>
+            <p class="lead mb-4">
+                Browse through all items that have been found and reported. If you see your lost item, claim it!
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control form-control-lg" id="searchInput"
+                            placeholder="Search found items by name, category, or description...">
+                        <button class="btn btn-primary" type="button" id="searchBtn">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <i class="bi bi-check2-circle" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="totalFoundItems">0</h3>
+                    <p>Found Items Available</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-calendar-check" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="recentFoundItems">0</h3>
+                    <p>Added This Week</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-people" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="totalClaimed">0</h3>
+                    <p>Successfully Claimed</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="py-4 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h5 class="mb-3">Filter by Category:</h5>
+                    <div class="btn-group flex-wrap" role="group">
+                        <button type="button" class="btn btn-outline-primary active" data-filter="all">
+                            <i class="bi bi-grid"></i> All
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Electronics">
+                            <i class="bi bi-phone"></i> Electronics
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Documents">
+                            <i class="bi bi-file-text"></i> Documents
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Accessories">
+                            <i class="bi bi-bag"></i> Accessories
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Keys">
+                            <i class="bi bi-key"></i> Keys
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Clothing">
+                            <i class="bi bi-person"></i> Clothing
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Books">
+                            <i class="bi bi-book"></i> Books
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Sports Equipment">
+                            <i class="bi bi-trophy"></i> Sports
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Personal Items">
+                            <i class="bi bi-briefcase"></i> Personal
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="Other">
+                            <i class="bi bi-question-circle"></i> Other
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- All Found Items Section -->
+    <section class="py-5">
+        <div class="container">
+            <div id="allFoundItemsContainer" class="row">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3">Loading found items...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-2">
+                <i class="bi bi-search"></i> Campus Lost & Found Portal - DSA Project
+            </p>
+            <p class="mb-0">
+                <small>Built with Linked Lists, Stacks, and Hash Tables</small>
+            </p>
+            <p class="mt-2">
+                <small>© 2025 Lost & Found Portal. Educational Project.</small>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Three.js for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Firebase SDK (compat version for regular scripts) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAALYUIoqn14jmUnDZB0ORkpBsFrivzLlU",
+            authDomain: "lostfoundportal-dsa.firebaseapp.com",
+            projectId: "lostfoundportal-dsa",
+            storageBucket: "lostfoundportal-dsa.firebasestorage.app",
+            messagingSenderId: "1032918662830",
+            appId: "1:1032918662830:web:d2a2fae6b1f656cc0eb73f",
+            measurementId: "G-TZR77G82ZG"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const storage = firebase.storage();
+        console.log("✅ Firebase initialized successfully!");
+    </script>
+
+    <!-- Authentication Module -->
+    <script src="js/auth.js"></script>
+
+    <!-- DSA Structures -->
+    <script src="../backend/dsa_structures/LinkedList.js"></script>
+    <script src="../backend/dsa_structures/Stack.js"></script>
+    <script src="../backend/dsa_structures/HashTable.js"></script>
+
+    <!-- New Feature Modules -->
+    <script src="js/threejs-background.js"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="js/messaging.js"></script>
+
+    <!-- Found Items Page Script -->
+    <script src="js/found-items.js"></script>
+
+    <!-- Loading Screen Script -->
+    <script>
+        // Hide loading screen when page is fully loaded
+        window.addEventListener('load', function () {
+            const loadingScreen = document.getElementById('loadingScreen');
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                setTimeout(() => {
+                    loadingScreen.remove();
+                }, 500);
+            }, 500);
+        });
+
+        // Initialize theme toggle button
+        const themeToggleContainer = document.getElementById('themeToggleContainer');
+        if (themeToggleContainer && window.themeManager) {
+            const toggleBtn = themeManager.createToggleButton();
+            themeToggleContainer.appendChild(toggleBtn);
+        }
+
+        // Initialize messaging when user is authenticated
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && window.messagingManager) {
+                messagingManager.init(user);
+            }
+        });
+    </script>
+</body>
+
+</html>

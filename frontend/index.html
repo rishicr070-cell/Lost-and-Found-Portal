@@ -52,51 +52,76 @@
                             <i class="bi bi-house-door"></i> Home
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#report">
-                            <i class="bi bi-plus-circle"></i> Report Item
+
+                    <!-- Pages Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-grid"></i> Pages
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="pagesDropdown">
+                            <li><a class="dropdown-item" href="#search">
+                                    <i class="bi bi-search"></i> Search Items
+                                </a></li>
+                            <li><a class="dropdown-item" href="my-items.html">
+                                    <i class="bi bi-box-seam"></i> My Items
+                                </a></li>
+                            <li><a class="dropdown-item" href="found-items.html">
+                                    <i class="bi bi-check-circle"></i> All Found Items
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#notifications">
+                                    <i class="bi bi-bell"></i> Notifications
+                                    <span id="notificationBadgeDropdown" class="badge bg-danger ms-2 d-none">0</span>
+                                </a></li>
+                            <li><a class="dropdown-item" href="#claims">
+                                    <i class="bi bi-hand-thumbs-up"></i> My Claims
+                                </a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#search">
-                            <i class="bi bi-search"></i> Search
+
+                    <!-- Actions Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="actionsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-lightning"></i> Actions
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionsDropdown">
+                            <li><a class="dropdown-item" href="#report">
+                                    <i class="bi bi-plus-circle"></i> Report Item
+                                </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="openMessagesModal(); return false;">
+                                    <i class="bi bi-chat-dots"></i> Messages
+                                    <span id="messagesBadgeDropdown" class="badge bg-danger ms-2 d-none">0</span>
+                                </a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#notifications">
-                            <i class="bi bi-bell"></i> Notifications
-                            <span id="notificationBadge" class="badge bg-danger d-none">0</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#claims">
-                            <i class="bi bi-hand-thumbs-up"></i> My Claims
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="my-items.html">
-                            <i class="bi bi-box-seam"></i> My Items
-                        </a>
-                    </li>
-                    <li class="nav-item message-badge">
-                        <a class="nav-link" href="#" onclick="openMessagesModal(); return false;">
-                            <i class="bi bi-chat-dots"></i> Messages
-                            <span id="messagesBadge" class="badge bg-danger d-none">0</span>
-                        </a>
-                    </li>
-                    <!-- User Info & Logout Button -->
-                    <li class="nav-item">
-                        <span class="nav-link" id="userEmailDisplay" style="color: rgba(255,255,255,0.7);">
+
+                    <!-- User Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> <span id="userDisplayName">User</span>
-                        </span>
-                    </li>
-                    <li class="nav-item">
-                        <div id="themeToggleContainer" class="nav-link" style="padding: 0;"></div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-logout" href="#" id="logoutBtn">
-                            <i class="bi bi-box-arrow-right"></i> Logout
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><span class="dropdown-item-text text-muted small" id="userEmailDisplay">
+                                    <i class="bi bi-envelope"></i> <span id="userEmailText">user@email.com</span>
+                                </span></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <div class="dropdown-item" id="themeToggleContainer"></div>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -396,6 +421,11 @@
             <div id="recentFoundItems" class="row">
                 <!-- Items will be loaded dynamically -->
             </div>
+            <div class="text-center mt-4">
+                <a href="found-items.html" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> View All Found Items
+                </a>
+            </div>
         </div>
     </section>
 
@@ -658,11 +688,96 @@
             emailService.init();
         }
 
+        // Sync badge counts between navbar and dropdowns
+        function syncBadges() {
+            // Sync notification badges
+            const notifBadge = document.getElementById('notificationBadge');
+            const notifBadgeDropdown = document.getElementById('notificationBadgeDropdown');
+            if (notifBadge && notifBadgeDropdown) {
+                notifBadgeDropdown.textContent = notifBadge.textContent;
+                if (notifBadge.classList.contains('d-none')) {
+                    notifBadgeDropdown.classList.add('d-none');
+                } else {
+                    notifBadgeDropdown.classList.remove('d-none');
+                }
+            }
+
+            // Sync messages badges
+            const msgBadge = document.getElementById('messagesBadge');
+            const msgBadgeDropdown = document.getElementById('messagesBadgeDropdown');
+            if (msgBadge && msgBadgeDropdown) {
+                msgBadgeDropdown.textContent = msgBadge.textContent;
+                if (msgBadge.classList.contains('d-none')) {
+                    msgBadgeDropdown.classList.add('d-none');
+                } else {
+                    msgBadgeDropdown.classList.remove('d-none');
+                }
+            }
+        }
+
+        // Sync badges periodically
+        setInterval(syncBadges, 1000);
+        syncBadges(); // Initial sync
+
         // Initialize messaging when user is authenticated
         firebase.auth().onAuthStateChanged((user) => {
             if (user && window.messagingManager) {
                 messagingManager.init(user);
             }
+        });
+
+        // Initialize Bootstrap dropdowns manually
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🔧 Initializing dropdowns...');
+
+            // Check if Bootstrap is loaded
+            if (typeof bootstrap === 'undefined') {
+                console.error('❌ Bootstrap is not loaded!');
+                return;
+            }
+
+            // Initialize all dropdowns
+            const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+            console.log('📋 Found dropdown toggles:', dropdownElementList.length);
+
+            const dropdownList = [...dropdownElementList].map(dropdownToggleEl => {
+                // Add click event listener as fallback
+                dropdownToggleEl.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const dropdownMenu = this.nextElementSibling;
+                    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+                        // Close all other dropdowns
+                        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                            if (menu !== dropdownMenu) {
+                                menu.classList.remove('show');
+                            }
+                        });
+
+                        // Toggle current dropdown
+                        dropdownMenu.classList.toggle('show');
+                        console.log('🔽 Dropdown toggled:', this.id);
+                    }
+                });
+
+                // Initialize Bootstrap dropdown
+                return new bootstrap.Dropdown(dropdownToggleEl, {
+                    autoClose: true,
+                    boundary: 'viewport'
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+
+            console.log('✅ Bootstrap dropdowns initialized:', dropdownList.length);
         });
     </script>
 
