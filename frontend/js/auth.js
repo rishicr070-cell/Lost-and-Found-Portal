@@ -238,29 +238,21 @@ auth.onAuthStateChanged((user) => {
  * Update UI with logged-in user information
  */
 function updateUIWithUser(user) {
-    // Update navbar with user email and logout button
-    const navbarNav = document.querySelector('.navbar-nav');
-    if (navbarNav) {
-        // Remove existing user info if any
-        const existingUserInfo = document.getElementById('userInfo');
-        if (existingUserInfo) {
-            existingUserInfo.remove();
-        }
+    // Update user display name in dropdown
+    const userDisplayName = document.getElementById('userDisplayName');
+    if (userDisplayName) {
+        // Extract name from email (part before @)
+        const emailName = user.email.split('@')[0];
+        userDisplayName.textContent = emailName;
+    }
 
-        // Add user info and logout button
-        const userInfoHtml = `
-            <li class="nav-item dropdown" id="userInfo">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-person-circle"></i> ${user.email}
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" onclick="handleLogout(); return false;">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a></li>
-                </ul>
-            </li>
-        `;
-        navbarNav.insertAdjacentHTML('beforeend', userInfoHtml);
+    // Add logout event listener
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleLogout();
+        });
     }
 
     // Auto-fill email in forms

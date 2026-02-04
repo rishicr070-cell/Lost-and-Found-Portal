@@ -16,6 +16,10 @@ This project implements a web-based lost and found portal for RVCE campus, showc
 - 🔔 **Notifications**: Claim requests notify item owners
 - ✅ **Mark as Retrieved**: Owners can mark items as found and remove them
 - 🔍 **Fast Search**: O(1) search using custom Hash Table
+- 🗺️ **Interactive Maps**: Pin exact locations with Leaflet.js (NEW!)
+- 🌓 **Dark Mode**: System-aware theme with smooth transitions (NEW!)
+- 💬 **In-App Messaging**: Real-time chat between users (NEW!)
+- 🎊 **Confetti Celebrations**: Success animations for claims (NEW!)
 
 ## 🏗️ Project Structure
 

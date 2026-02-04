@@ -378,7 +378,8 @@ async function submitFoundItem() {
 }
 
 /**
- * Perform search using Hash Table (O(1) complexity)
+ * Perform search using Hash Table + Synonyms
+ * Now includes synonym matching!
  */
 function performSearch() {
     const searchInput = document.getElementById('searchInput');
@@ -389,10 +390,29 @@ function performSearch() {
         return;
     }
 
-    console.log(`Searching for: "${searchTerm}" using Hash Table...`);
+    console.log(`Searching for: "${searchTerm}"...`);
 
-    // Use Hash Table for O(1) search
-    const results = itemHashTable.searchPartial(searchTerm);
+    // Get direct results from Hash Table
+    let results = itemHashTable.searchPartial(searchTerm);
+
+    // Also search for synonyms if smartMatcher is available
+    if (typeof smartMatcher !== 'undefined' && smartMatcher.getSynonyms) {
+        const synonyms = smartMatcher.getSynonyms(searchTerm);
+        console.log(`   Synonyms for "${searchTerm}":`, synonyms);
+
+        // Search for each synonym
+        synonyms.forEach(synonym => {
+            if (synonym !== searchTerm) {
+                const synonymResults = itemHashTable.searchPartial(synonym);
+                // Add unique results
+                synonymResults.forEach(item => {
+                    if (!results.find(r => r.id === item.id)) {
+                        results.push(item);
+                    }
+                });
+            }
+        });
+    }
 
     // Log search action to Stack
     actionStack.push({
@@ -404,7 +424,7 @@ function performSearch() {
 
     displaySearchResults(results, searchTerm);
 
-    console.log(`Found ${results.length} results in O(1) time!`);
+    console.log(`Found ${results.length} results (including synonyms)!`);
 }
 
 /**
@@ -414,21 +434,40 @@ function displaySearchResults(results, searchTerm) {
     const searchResults = document.getElementById('searchResults');
 
     if (results.length === 0) {
+        // Get synonyms to suggest
+        let synonymSuggestion = '';
+        if (typeof smartMatcher !== 'undefined' && smartMatcher.getSynonyms) {
+            const synonyms = smartMatcher.getSynonyms(searchTerm).slice(0, 5);
+            if (synonyms.length > 1) {
+                synonymSuggestion = `<p class="text-muted small">Try searching for: ${synonyms.join(', ')}</p>`;
+            }
+        }
+
         searchResults.innerHTML = `
             <div class="col-12">
                 <div class="empty-state">
                     <i class="bi bi-search"></i>
                     <h4>No results found for "${searchTerm}"</h4>
                     <p>Try different keywords or browse recent items below</p>
+                    ${synonymSuggestion}
                 </div>
             </div>
         `;
         return;
     }
 
+    // Check if synonyms were used
+    let synonymNote = '';
+    if (typeof smartMatcher !== 'undefined' && smartMatcher.getSynonyms) {
+        const synonyms = smartMatcher.getSynonyms(searchTerm);
+        if (synonyms.length > 1) {
+            synonymNote = `<small class="text-muted">(Also searched: ${synonyms.slice(1, 4).join(', ')}...)</small>`;
+        }
+    }
+
     searchResults.innerHTML = `
         <div class="col-12 mb-3">
-            <h5>Found ${results.length} result(s) for "${searchTerm}"</h5>
+            <h5>Found ${results.length} result(s) for "${searchTerm}" ${synonymNote}</h5>
         </div>
     `;
 
@@ -492,6 +531,15 @@ function createItemCard(item, showClaimButton = false, oppositeItemId = null) {
         </button>
     ` : '';
 
+    // Message button (only show if not own item)
+    const currentUser = firebase.auth().currentUser;
+    const messageButtonHtml = currentUser && item.contact !== currentUser.email ? `
+        <button class="btn btn-sm btn-outline-primary w-100 mt-2" 
+                onclick="startItemConversation('${item.id}', '${item.name}', '${item.contact}')">
+            <i class="bi bi-chat-dots"></i> Message Owner
+        </button>
+    ` : '';
+
     // Display image or icon placeholder
     const imageHtml = item.imageUrl ? `
         <img src="${item.imageUrl}" class="card-img-top" alt="${item.name}" 
@@ -500,6 +548,16 @@ function createItemCard(item, showClaimButton = false, oppositeItemId = null) {
         <div class="item-image-placeholder">
             <i class="bi ${getIconForCategory(item.category)}"></i>
         </div>
+    `;
+
+    // Location display with map coordinates if available
+    const locationHtml = item.coordinates ? `
+        <i class="bi bi-geo-alt"></i> ${item.location} 
+        <a href="#" onclick="showItemOnMap('${item.id}'); return false;" class="text-primary">
+            <i class="bi bi-map"></i>
+        </a>
+    ` : `
+        <i class="bi bi-geo-alt"></i> ${item.location}
     `;
 
     return `
@@ -517,7 +575,7 @@ function createItemCard(item, showClaimButton = false, oppositeItemId = null) {
                 <div class="mb-2">
                     <small class="text-muted">
                         <i class="bi bi-calendar"></i> ${item.date}<br>
-                        <i class="bi bi-geo-alt"></i> ${item.location}<br>
+                        ${locationHtml}<br>
                         <i class="bi bi-palette"></i> ${item.color}
                     </small>
                 </div>
@@ -525,6 +583,7 @@ function createItemCard(item, showClaimButton = false, oppositeItemId = null) {
                     View Details
                 </button>
                 ${claimButtonHtml}
+                ${messageButtonHtml}
             </div>
         </div>
     `;
@@ -1256,3 +1315,95 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ============================================
+// MAP INTEGRATION FUNCTIONS
+// ============================================
+
+/**
+ * Show item location on map
+ */
+function showItemOnMap(itemId) {
+    // Find item
+    let item = lostItemsList.search(itemId);
+    if (!item) {
+        item = foundItemsList.search(itemId);
+    }
+
+    if (!item || !item.coordinates) {
+        showNotification('No location data available for this item', 'warning');
+        return;
+    }
+
+    // Open map modal
+    const modal = new bootstrap.Modal(document.getElementById('mapModal'));
+    document.getElementById('mapModalTitle').textContent = `Location: ${item.name}`;
+    document.getElementById('mapInstructions').textContent = `This item was ${item.type} here`;
+
+    modal.show();
+
+    // Wait for modal to be visible, then initialize map
+    setTimeout(() => {
+        mapManager.showLocation('modalMapContainer', item.coordinates, `
+            <strong>${item.name}</strong><br>
+            ${item.type === 'lost' ? 'Lost' : 'Found'} on ${item.date}<br>
+            ${item.location}
+        `);
+    }, 300);
+}
+
+/**
+ * Open location picker for reporting items
+ */
+function openLocationPicker(callback) {
+    const modal = new bootstrap.Modal(document.getElementById('mapModal'));
+    document.getElementById('mapModalTitle').textContent = 'Select Location';
+    document.getElementById('mapInstructions').textContent = 'Click on the map to mark where you found/lost the item';
+
+    modal.show();
+
+    // Wait for modal to be visible
+    setTimeout(() => {
+        mapManager.createLocationPicker('modalMapContainer', (location) => {
+            document.getElementById('selectedLocationPreview').classList.remove('d-none');
+            document.getElementById('selectedLocationText').textContent = mapManager.formatLocation(location);
+        });
+
+        // Confirm button handler
+        document.getElementById('confirmLocationBtn').onclick = () => {
+            if (mapManager.selectedLocation) {
+                callback(mapManager.selectedLocation);
+                modal.hide();
+                mapManager.destroyMap('modalMapContainer');
+            } else {
+                showNotification('Please select a location on the map', 'warning');
+            }
+        };
+    }, 300);
+}
+
+// ============================================
+// ENHANCED CLAIM SUCCESS WITH CONFETTI
+// ============================================
+
+/**
+ * Override the claim success to add confetti
+ */
+const originalClaimSuccess = window.handleClaimSuccess || function () { };
+window.handleClaimSuccess = function (claimData) {
+    // Trigger confetti celebration
+    if (typeof celebrateSuccess === 'function') {
+        celebrateSuccess('🎉 Item claimed successfully! The owner has been notified.');
+    }
+
+    // Call original handler if it exists
+    if (originalClaimSuccess !== window.handleClaimSuccess) {
+        originalClaimSuccess(claimData);
+    }
+};
+
+// Make functions globally accessible
+window.showItemOnMap = showItemOnMap;
+window.openLocationPicker = openLocationPicker;
+
+console.log('✅ Map and confetti integrations loaded');

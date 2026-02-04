@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Items - Lost & Found Portal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3 class="mt-4">Loading Your Items...</h3>
+            <p class="text-muted">Please wait</p>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-search"></i> Lost & Found Portal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#home">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#report">
+                            <i class="bi bi-plus-circle"></i> Report Item
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#search">
+                            <i class="bi bi-search"></i> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#notifications">
+                            <i class="bi bi-bell"></i> Notifications
+                            <span id="notificationBadge" class="badge bg-danger d-none">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html#claims">
+                            <i class="bi bi-hand-thumbs-up"></i> My Claims
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="my-items.html">
+                            <i class="bi bi-box-seam"></i> My Items
+                        </a>
+                    </li>
+                    <!-- User Info & Logout Button -->
+                    <li class="nav-item">
+                        <span class="nav-link" id="userEmailDisplay" style="color: rgba(255,255,255,0.7);">
+                            <i class="bi bi-person-circle"></i> <span id="userDisplayName">User</span>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-logout" href="#" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 mb-3">
+                        <i class="bi bi-box-seam"></i> My Items
+                    </h1>
+                    <p class="lead mb-0">
+                        Manage all items you have reported to the Lost & Found Portal
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-grid gap-2">
+                        <a href="index.html#report" class="btn btn-light btn-lg">
+                            <i class="bi bi-plus-circle"></i> Report New Item
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- My Items Section -->
+    <section class="my-items-section py-5">
+        <div class="container">
+            <!-- Filter Tabs -->
+            <ul class="nav nav-pills justify-content-center mb-4" id="myItemsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-items-tab" data-bs-toggle="pill" data-bs-target="#all-items"
+                        type="button" role="tab">
+                        <i class="bi bi-list-ul"></i> All Items
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="lost-items-tab" data-bs-toggle="pill" data-bs-target="#lost-items"
+                        type="button" role="tab">
+                        <i class="bi bi-exclamation-circle"></i> Lost Items
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="found-items-tab" data-bs-toggle="pill" data-bs-target="#found-items"
+                        type="button" role="tab">
+                        <i class="bi bi-check-circle"></i> Found Items
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="myItemsTabContent">
+                <!-- All Items Tab -->
+                <div class="tab-pane fade show active" id="all-items" role="tabpanel">
+                    <div id="allMyItemsContainer" class="row">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-3">Loading your items...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lost Items Tab -->
+                <div class="tab-pane fade" id="lost-items" role="tabpanel">
+                    <div id="myLostItemsContainer" class="row">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-danger" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-3">Loading your lost items...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Found Items Tab -->
+                <div class="tab-pane fade" id="found-items" role="tabpanel">
+                    <div id="myFoundItemsContainer" class="row">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-3">Loading your found items...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="row mt-5">
+                <div class="col-md-8 mx-auto">
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">
+                            <i class="bi bi-info-circle"></i> About My Items
+                        </h5>
+                        <p class="mb-0">
+                            This page shows all items you have reported. You can view details and delete items
+                            that are no longer relevant. Deleting an item will permanently remove it from the
+                            database and it cannot be recovered.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-2">
+                <i class="bi bi-search"></i> Lost & Found Portal
+            </p>
+            <p class="text-muted small mb-0">
+                Built with Linked Lists, Stacks, and Hash Tables |
+                <a href="index.html" class="text-white">Back to Home</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config & Initialization -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAALYUIoqn14jmUnDZB0ORkpBsFrivzLlU",
+            authDomain: "lostfoundportal-dsa.firebaseapp.com",
+            projectId: "lostfoundportal-dsa",
+            storageBucket: "lostfoundportal-dsa.firebasestorage.app",
+            messagingSenderId: "1032918662830",
+            appId: "1:1032918662830:web:d2a2fae6b1f656cc0eb73f",
+            measurementId: "G-TZR77G82ZG"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        console.log('✅ Firebase initialized successfully!');
+    </script>
+
+    <!-- DSA Structures -->
+    <script src="../backend/dsa_structures/LinkedList.js"></script>
+    <script src="../backend/dsa_structures/Stack.js"></script>
+    <script src="../backend/dsa_structures/HashTable.js"></script>
+
+    <!-- Initialize DSA structures (needed for delete functionality) -->
+    <script>
+        // Initialize DSA structures globally
+        let lostItemsList = new LinkedList();
+        let foundItemsList = new LinkedList();
+        let actionStack = new Stack(50);
+        let itemHashTable = new HashTable(50);
+    </script>
+
+    <!-- My Items Management -->
+    <script src="js/my-items.js"></script>
+
+    <!-- Page Initialization -->
+    <script>
+        // Authentication handlers
+        function handleLogout() {
+            auth.signOut().then(() => {
+                console.log('✅ User logged out');
+                window.location.href = 'login.html';
+            }).catch((error) => {
+                console.error('❌ Logout error:', error);
+                alert('Failed to logout. Please try again.');
+            });
+        }
+
+        // Attach logout button handler
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            }
+        });
+
+        // Load items when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('My Items page loaded');
+
+            // Check if user is logged in
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('User logged in:', user.email);
+
+                    // Update user display
+                    const userDisplayName = document.getElementById('userDisplayName');
+                    if (userDisplayName) {
+                        const emailName = user.email.split('@')[0];
+                        userDisplayName.textContent = emailName;
+                    }
+
+                    // Load user's items immediately
+                    loadMyItems();
+                } else {
+                    console.log('No user logged in, redirecting to login');
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        // Hide loading screen
+        window.addEventListener('load', function () {
+            const loadingScreen = document.getElementById('loadingScreen');
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                setTimeout(() => {
+                    loadingScreen.remove();
+                }, 500);
+            }, 500);
+        });
+
+        // Helper functions needed for my-items.js
+        function getIconForCategory(category) {
+            const icons = {
+                'Electronics': 'bi-phone',
+                'Documents': 'bi-file-text',
+                'Accessories': 'bi-bag',
+                'Keys': 'bi-key',
+                'Clothing': 'bi-person',
+                'Books': 'bi-book',
+                'Sports Equipment': 'bi-trophy',
+                'Personal Items': 'bi-briefcase'
+            };
+            return icons[category] || 'bi-question-circle';
+        }
+
+        function showNotification(message, type = 'info') {
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                toastContainer.style.zIndex = '11';
+                document.body.appendChild(toastContainer);
+            }
+
+            const colors = {
+                'success': { bg: 'bg-success', icon: 'bi-check-circle-fill' },
+                'warning': { bg: 'bg-warning', icon: 'bi-exclamation-triangle-fill' },
+                'danger': { bg: 'bg-danger', icon: 'bi-x-circle-fill' },
+                'info': { bg: 'bg-info', icon: 'bi-info-circle-fill' }
+            };
+            const color = colors[type] || colors['info'];
+
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white ${color.bg} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${color.icon} me-2"></i> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+
+            toastElement.addEventListener('hidden.bs.toast', function () {
+                this.remove();
+            });
+        }
+
+        function viewItemDetails(itemId) {
+            // Redirect to main page with item details
+            window.location.href = `index.html#item-${itemId}`;
+        }
+
+        // Make functions globally accessible
+        window.getIconForCategory = getIconForCategory;
+        window.showNotification = showNotification;
+        window.viewItemDetails = viewItemDetails;
+    </script>
+</body>
+
+</html>

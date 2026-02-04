@@ -19,6 +19,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -68,6 +71,31 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#claims">
                             <i class="bi bi-hand-thumbs-up"></i> My Claims
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-items.html">
+                            <i class="bi bi-box-seam"></i> My Items
+                        </a>
+                    </li>
+                    <li class="nav-item message-badge">
+                        <a class="nav-link" href="#" onclick="openMessagesModal(); return false;">
+                            <i class="bi bi-chat-dots"></i> Messages
+                            <span id="messagesBadge" class="badge bg-danger d-none">0</span>
+                        </a>
+                    </li>
+                    <!-- User Info & Logout Button -->
+                    <li class="nav-item">
+                        <span class="nav-link" id="userEmailDisplay" style="color: rgba(255,255,255,0.7);">
+                            <i class="bi bi-person-circle"></i> <span id="userDisplayName">User</span>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <div id="themeToggleContainer" class="nav-link" style="padding: 0;"></div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-logout" href="#" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> Logout
                         </a>
                     </li>
                 </ul>
@@ -313,6 +341,12 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Three.js for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Firebase SDK (compat version for regular scripts) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -347,6 +381,13 @@
     <script src="../backend/dsa_structures/LinkedList.js"></script>
     <script src="../backend/dsa_structures/Stack.js"></script>
     <script src="../backend/dsa_structures/HashTable.js"></script>
+
+    <!-- New Feature Modules -->
+    <script src="js/threejs-background.js"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="js/confetti.js"></script>
+    <script src="js/map-integration.js"></script>
+    <script src="js/messaging.js"></script>
 
     <!-- Image Upload Module -->
     <script src="js/image-upload.js"></script>
@@ -405,6 +446,81 @@
         </div>
     </div>
 
+    <!-- Messages Modal -->
+    <div class="modal fade" id="messagesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-brand text-white"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="modal-title">
+                        <i class="bi bi-chat-dots"></i> Messages
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <!-- Conversations List View -->
+                    <div id="conversationsView">
+                        <div class="p-3">
+                            <h6 class="mb-3">Your Conversations</h6>
+                        </div>
+                        <div id="conversationsList" class="conversations-list">
+                            <p class="text-center text-muted p-4">Loading conversations...</p>
+                        </div>
+                    </div>
+
+                    <!-- Chat View (hidden by default) -->
+                    <div id="chatView" class="d-none">
+                        <div class="p-3 border-bottom">
+                            <button class="btn btn-sm btn-outline-primary" onclick="backToConversations()">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </button>
+                            <span id="chatWithUser" class="ms-2 fw-bold"></span>
+                        </div>
+                        <div class="chat-container">
+                            <div id="chatMessages" class="chat-messages"></div>
+                            <div class="chat-input-container">
+                                <form id="chatForm" class="chat-input-form">
+                                    <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..."
+                                        required>
+                                    <button type="submit" class="chat-send-btn">
+                                        <i class="bi bi-send-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div class="modal fade" id="mapModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-brand text-white"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="modal-title">
+                        <i class="bi bi-geo-alt"></i> <span id="mapModalTitle">Select Location</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3" id="mapInstructions">Click on the map to select a location</p>
+                    <div id="modalMapContainer" class="map-container"></div>
+                    <div id="selectedLocationPreview" class="location-preview d-none">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span id="selectedLocationText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmLocationBtn">Confirm Location</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification System -->
     <script src="js/notifications.js"></script>
 
@@ -444,6 +560,139 @@
                 }
             });
         });
+
+        // Initialize theme toggle button
+        const themeToggleContainer = document.getElementById('themeToggleContainer');
+        if (themeToggleContainer && window.themeManager) {
+            const toggleBtn = themeManager.createToggleButton();
+            themeToggleContainer.appendChild(toggleBtn);
+        }
+
+        // Initialize messaging when user is authenticated
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && window.messagingManager) {
+                messagingManager.init(user);
+            }
+        });
+    </script>
+
+    <!-- Messaging UI Functions -->
+    <script>
+        let currentConversationId = null;
+
+        // Open messages modal
+        async function openMessagesModal() {
+            const modal = new bootstrap.Modal(document.getElementById('messagesModal'));
+            modal.show();
+            await loadConversationsList();
+        }
+
+        // Load conversations list
+        async function loadConversationsList() {
+            const container = document.getElementById('conversationsList');
+            const conversations = await messagingManager.getConversations();
+
+            if (conversations.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted p-4">No conversations yet. Start chatting about an item!</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            conversations.forEach(conv => {
+                const otherUser = conv.participants.find(p => p !== firebase.auth().currentUser.email);
+                const unread = conv.unreadCount?.[firebase.auth().currentUser.email] || 0;
+
+                const item = document.createElement('div');
+                item.className = `conversation-item ${unread > 0 ? 'unread' : ''}`;
+                item.onclick = () => openChat(conv.id, otherUser, conv.itemName);
+
+                item.innerHTML = `
+                    <div class="conversation-avatar">${messagingManager.getUserInitials(otherUser)}</div>
+                    <div class="conversation-details">
+                        <div class="conversation-name">${otherUser.split('@')[0]}</div>
+                        <div class="conversation-preview">Re: ${conv.itemName}</div>
+                        <small class="text-muted">${conv.lastMessage || 'No messages yet'}</small>
+                    </div>
+                    ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        // Open chat view
+        function openChat(conversationId, otherUser, itemName) {
+            currentConversationId = conversationId;
+
+            document.getElementById('conversationsView').classList.add('d-none');
+            document.getElementById('chatView').classList.remove('d-none');
+            document.getElementById('chatWithUser').textContent = `${otherUser.split('@')[0]} - ${itemName}`;
+
+            loadMessages(conversationId);
+            messagingManager.markAsRead(conversationId);
+        }
+
+        // Back to conversations
+        function backToConversations() {
+            document.getElementById('chatView').classList.add('d-none');
+            document.getElementById('conversationsView').classList.remove('d-none');
+            currentConversationId = null;
+            loadConversationsList();
+        }
+
+        // Load messages
+        function loadMessages(conversationId) {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+
+            messagingManager.listenToMessages(conversationId, (messages) => {
+                container.innerHTML = '';
+                messages.forEach(msg => {
+                    const isSent = msg.senderId === firebase.auth().currentUser.email;
+                    const time = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString() : 'Sending...';
+
+                    const messageEl = document.createElement('div');
+                    messageEl.className = `message ${isSent ? 'sent' : ''}`;
+                    messageEl.innerHTML = `
+                        <div class="message-avatar">${messagingManager.getUserInitials(msg.senderId)}</div>
+                        <div class="message-content">
+                            <p class="message-text">${msg.text}</p>
+                            <small class="message-time">${time}</small>
+                        </div>
+                    `;
+                    container.appendChild(messageEl);
+                });
+
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        // Send message
+        document.getElementById('chatForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+
+            if (text && currentConversationId) {
+                await messagingManager.sendMessage(currentConversationId, text);
+                input.value = '';
+            }
+        });
+
+        // Start conversation from item card
+        async function startItemConversation(itemId, itemName, ownerEmail) {
+            const conversationId = await messagingManager.startConversation(itemId, itemName, ownerEmail);
+            if (conversationId) {
+                openMessagesModal();
+                setTimeout(() => openChat(conversationId, ownerEmail, itemName), 500);
+            }
+        }
+
+        // Make globally accessible
+        window.openMessagesModal = openMessagesModal;
+        window.startItemConversation = startItemConversation;
+        window.backToConversations = backToConversations;
     </script>
 </body>
 
