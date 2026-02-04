@@ -238,19 +238,31 @@ function setupEventListeners() {
  * Submit Lost Item
  */
 async function submitLostItem() {
-    const item = {
-        name: document.getElementById('lostItemName').value,
-        category: document.getElementById('lostItemCategory').value,
-        description: document.getElementById('lostItemDescription').value,
-        date: document.getElementById('lostItemDate').value,
-        location: document.getElementById('lostItemLocation').value,
-        color: document.getElementById('lostItemColor').value || 'Not specified',
-        contact: document.getElementById('lostItemContact').value,
-        type: 'lost',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    const submitBtn = document.getElementById('submitLostItemBtn');
 
     try {
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Uploading...';
+
+        const item = {
+            name: document.getElementById('lostItemName').value,
+            category: document.getElementById('lostItemCategory').value,
+            description: document.getElementById('lostItemDescription').value,
+            date: document.getElementById('lostItemDate').value,
+            location: document.getElementById('lostItemLocation').value,
+            color: document.getElementById('lostItemColor').value || 'Not specified',
+            contact: document.getElementById('lostItemContact').value,
+            type: 'lost',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Upload image if selected
+        const imageFile = document.getElementById('lostItemImage').files[0];
+        if (imageFile) {
+            item.imageUrl = await uploadImage(imageFile, 'lost', 'lostItemUploadProgress');
+        }
+
         // Save to Firebase
         const docRef = await db.collection('items').add(item);
         item.id = docRef.id;
@@ -283,6 +295,7 @@ async function submitLostItem() {
 
         // Reset form
         document.getElementById('lostItemForm').reset();
+        document.getElementById('lostItemImagePreview').innerHTML = '';
 
         // Show success message
         showNotification('Lost item reported and saved to database!', 'success');
@@ -297,8 +310,9 @@ async function submitLostItem() {
         console.error('❌ Error saving to Firebase:', error);
         showNotification('Error saving item. Please try again.', 'danger');
     } finally {
+        // Re-enable button
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Report Item';
+        submitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Report Lost Item';
     }
 }
 
@@ -912,6 +926,70 @@ async function initiateClaim(lostItemId, foundItemId, userEmail) {
         claim.id = docRef.id;
 
         console.log('✅ Claim initiated:', claim);
+
+        // Send email notification to item owner
+        console.log('🔍 Checking email service...');
+        console.log('  - window.emailService exists:', !!window.emailService);
+        console.log('  - emailService.initialized:', emailService?.initialized);
+
+        try {
+            if (window.emailService && emailService.initialized) {
+                const itemOwner = userEmail === lostItem.contact ? foundItem : lostItem;
+                const claimer = userEmail === lostItem.contact ? lostItem : foundItem;
+
+                console.log('📧 Preparing to send email...');
+                console.log('  - Item owner email:', itemOwner.contact);
+                console.log('  - Claimer email:', userEmail);
+
+                await emailService.sendClaimNotification(
+                    {
+                        contact: itemOwner.contact,
+                        name: itemOwner.name,
+                        type: itemOwner.type,
+                        category: itemOwner.category,
+                        description: itemOwner.description,
+                        location: itemOwner.location,
+                        date: itemOwner.date,
+                        color: itemOwner.color
+                    },
+                    {
+                        name: userEmail.split('@')[0],
+                        email: userEmail,
+                        verificationDetails: 'Claim initiated through portal'
+                    }
+                );
+                console.log('📧 Email notification sent');
+            } else {
+                console.warn('⚠️ Email service not available or not initialized');
+                console.log('  - Trying to initialize now...');
+                if (window.emailService) {
+                    emailService.init();
+                    console.log('  - Initialized, retrying email send...');
+
+                    const itemOwner = userEmail === lostItem.contact ? foundItem : lostItem;
+                    await emailService.sendClaimNotification(
+                        {
+                            contact: itemOwner.contact,
+                            name: itemOwner.name,
+                            type: itemOwner.type,
+                            category: itemOwner.category,
+                            description: itemOwner.description,
+                            location: itemOwner.location,
+                            date: itemOwner.date,
+                            color: itemOwner.color
+                        },
+                        {
+                            name: userEmail.split('@')[0],
+                            email: userEmail,
+                            verificationDetails: 'Claim initiated through portal'
+                        }
+                    );
+                }
+            }
+        } catch (emailError) {
+            console.error('❌ Email notification failed (non-critical):', emailError);
+            // Don't fail the claim if email fails
+        }
 
         // Log action to Stack
         actionStack.push({

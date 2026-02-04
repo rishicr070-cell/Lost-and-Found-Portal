@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📧 Email Service Test</h1>
+
+    <div>
+        <label>Your Email:</label>
+        <input type="email" id="testEmail" placeholder="your-email@example.com">
+        <button onclick="testEmailService()">Send Test Email</button>
+    </div>
+
+    <div id="status"></div>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <!-- Email Service -->
+    <script src="js/email-service.js"></script>
+
+    <script>
+        // Initialize email service
+        emailService.init();
+
+        async function testEmailService() {
+            const email = document.getElementById('testEmail').value;
+            const statusDiv = document.getElementById('status');
+
+            if (!email) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Please enter an email address';
+                return;
+            }
+
+            statusDiv.className = 'status';
+            statusDiv.textContent = '📧 Sending test email...';
+
+            const success = await emailService.testEmail(email);
+
+            if (success) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `
+                    ✅ Test email sent to ${email}!<br>
+                    Check your inbox (and spam folder).<br><br>
+                    <strong>If you received it, the email system is working!</strong>
+                `;
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `
+                    ❌ Failed to send email.<br>
+                    Check browser console (F12) for details.
+                `;
+            }
+        }
+
+        // Log initialization status
+        console.log('Email service initialized:', emailService.initialized);
+        console.log('Service ID:', emailService.serviceId);
+        console.log('Template ID:', emailService.templateId);
+    </script>
+</body>
+
+</html>

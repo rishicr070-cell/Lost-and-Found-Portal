@@ -66,6 +66,67 @@ async function claimItem(itemId) {
         console.log('   ✅ Notification created with ID:', notifRef.id);
         console.log('   📧 Notification sent to:', item.contact);
 
+        // Send email notification to item owner
+        console.log('   🔍 Checking email service...');
+        console.log('     - window.emailService exists:', !!window.emailService);
+        console.log('     - emailService.initialized:', emailService?.initialized);
+
+        try {
+            if (window.emailService && emailService.initialized) {
+                console.log('   📧 Sending email to item owner...');
+
+                await emailService.sendClaimNotification(
+                    {
+                        contact: item.contact,
+                        name: item.name,
+                        type: item.type,
+                        category: item.category,
+                        description: item.description,
+                        location: item.location,
+                        date: item.date,
+                        color: item.color
+                    },
+                    {
+                        name: user.email.split('@')[0],
+                        email: user.email,
+                        verificationDetails: 'Claim request via notification system'
+                    }
+                );
+
+                console.log('   ✅ Email sent successfully to:', item.contact);
+            } else {
+                console.warn('   ⚠️ Email service not initialized, trying to initialize...');
+                if (window.emailService) {
+                    emailService.init();
+                    console.log('   ✅ Email service initialized, sending email...');
+
+                    await emailService.sendClaimNotification(
+                        {
+                            contact: item.contact,
+                            name: item.name,
+                            type: item.type,
+                            category: item.category,
+                            description: item.description,
+                            location: item.location,
+                            date: item.date,
+                            color: item.color
+                        },
+                        {
+                            name: user.email.split('@')[0],
+                            email: user.email,
+                            verificationDetails: 'Claim request via notification system'
+                        }
+                    );
+                    console.log('   ✅ Email sent after initialization');
+                } else {
+                    console.error('   ❌ Email service not available');
+                }
+            }
+        } catch (emailError) {
+            console.error('   ❌ Email failed (non-critical):', emailError);
+            // Don't fail the claim if email fails
+        }
+
         showNotification(`Claim request sent to ${item.contact}`, 'success');
 
     } catch (error) {

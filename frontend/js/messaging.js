@@ -91,6 +91,12 @@ class MessagingManager {
         if (!this.currentUser || !text.trim()) return;
 
         try {
+            console.log('📤 Sending message:', {
+                conversationId,
+                text: text.trim(),
+                sender: this.currentUser.email
+            });
+
             const messageData = {
                 senderId: this.currentUser.email,
                 text: text.trim(),
@@ -99,10 +105,12 @@ class MessagingManager {
             };
 
             // Add message to subcollection
-            await db.collection('conversations')
+            const msgRef = await db.collection('conversations')
                 .doc(conversationId)
                 .collection('messages')
                 .add(messageData);
+
+            console.log('✅ Message added to Firestore:', msgRef.id);
 
             // Update conversation metadata
             const otherUser = await this.getOtherParticipant(conversationId);
@@ -112,9 +120,10 @@ class MessagingManager {
                 [`unreadCount.${otherUser}`]: firebase.firestore.FieldValue.increment(1)
             });
 
-            console.log('✅ Message sent');
+            console.log('✅ Conversation updated, other user:', otherUser);
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('❌ Error sending message:', error);
+            console.error('Error details:', error.code, error.message);
         }
     }
 
@@ -122,16 +131,24 @@ class MessagingManager {
      * Load messages for a conversation
      */
     listenToMessages(conversationId, callback) {
+        console.log('👂 Listening to messages for conversation:', conversationId);
+
         const unsubscribe = db.collection('conversations')
             .doc(conversationId)
             .collection('messages')
             .orderBy('timestamp', 'asc')
             .onSnapshot((snapshot) => {
+                console.log('📨 Messages snapshot received:', snapshot.size, 'messages');
                 const messages = [];
                 snapshot.forEach(doc => {
-                    messages.push({ id: doc.id, ...doc.data() });
+                    const data = { id: doc.id, ...doc.data() };
+                    console.log('  - Message:', data.senderId, ':', data.text);
+                    messages.push(data);
                 });
                 callback(messages);
+            }, (error) => {
+                console.error('❌ Error listening to messages:', error);
+                console.error('Error details:', error.code, error.message);
             });
 
         this.listeners.push(unsubscribe);

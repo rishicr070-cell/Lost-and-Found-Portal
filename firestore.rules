@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Items collection - anyone can read, authenticated users can write
+    match /items/{itemId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // Claims collection
+    match /claims/{claimId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Conversations - authenticated users can access
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null;
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+  }
+}
